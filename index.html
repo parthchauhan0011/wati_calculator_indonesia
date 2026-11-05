@@ -20,9 +20,39 @@
     --black:#1d1d1d;  --ink-soft:#4c514f; --muted:#7a827f;
     --page:#f7faf9;   --card:#ffffff;
     --rule:#e4e9e7;   --rule-soft:#eef2f0;
-    --warn:#b23a2e;
+    --warn:#b23a2e;   --on-warn:#ffffff;
+    --on-ink:#ffffff;                       /* text on a --black surface      */
+    --on-brand:#14211d;                     /* text on a solid brand colour   */
+    --hair:rgba(29,29,29,.07);              /* faint internal rules           */
+    --hair-2:rgba(29,29,29,.16);
+    --sunken:rgba(29,29,29,.05);            /* inset tracks and disabled wells*/
+    --wash:rgba(255,255,255,.55);           /* translucent panel on a tint    */
+    --wash-2:rgba(255,255,255,.75);
+    --totals-bg:#fbfdfc;
+    --logo-filter:none;
     --shadow:0 1px 2px rgba(29,29,29,.04), 0 18px 40px -28px rgba(29,29,29,.28);
     --font:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  }
+
+  /* Dark mode, opt-in only. Brand accents keep their hue; the tints become deep
+     versions of themselves so the colour coding still reads. */
+  :root[data-theme="dark"] {
+    --green-soft:#0c3a2b; --blue-soft:#0d2b3a;
+    --yellow-soft:#39331a; --pink-soft:#321f39;
+    --black:#eef3f1;  --ink-soft:#c2ccc8; --muted:#8c9794;
+    --page:#0d1211;   --card:#151b19;
+    --rule:#28312e;   --rule-soft:#1d2422;
+    --warn:#e3705f;   --on-warn:#1a0f0d;
+    --on-ink:#0e1413;
+    --on-brand:#14211d;
+    --hair:rgba(255,255,255,.10);
+    --hair-2:rgba(255,255,255,.20);
+    --sunken:rgba(255,255,255,.07);
+    --wash:rgba(255,255,255,.06);
+    --wash-2:rgba(255,255,255,.09);
+    --totals-bg:#111715;
+    --logo-filter:brightness(0) invert(1);
+    --shadow:0 1px 2px rgba(0,0,0,.40), 0 18px 40px -28px rgba(0,0,0,.80);
   }
   *{box-sizing:border-box}
   html{-webkit-text-size-adjust:100%}
@@ -41,15 +71,15 @@
   .topbar-in{display:flex;align-items:center;justify-content:space-between;gap:16px;
     padding:15px 22px;max-width:1200px;margin:0 auto;flex-wrap:wrap}
   .brand{display:flex;align-items:center;gap:13px;flex-wrap:wrap}
-  .brand img{height:26px;display:block}
+  .brand img{height:26px;display:block;filter:var(--logo-filter)}
   .brand .divider{width:1px;height:20px;background:var(--rule)}
   .brand .toolname{font-weight:500;font-size:.94rem}
   .regionpill{font-size:12px;font-weight:700;padding:5px 11px;border-radius:999px;
-    background:var(--yellow);color:var(--black);white-space:nowrap}
+    background:var(--yellow);color:var(--on-brand);white-space:nowrap}
   .cycle{display:flex;background:var(--green-soft);border-radius:999px;padding:3px}
   .cycle button{font-family:var(--font);font-size:13px;font-weight:500;padding:7px 16px;border:0;
     background:transparent;color:var(--ink-soft);cursor:pointer;border-radius:999px}
-  .cycle button[aria-pressed="true"]{background:var(--green);color:var(--black);font-weight:700}
+  .cycle button[aria-pressed="true"]{background:var(--green);color:var(--on-brand);font-weight:700}
   .cycle button:focus-visible{outline:2px solid var(--black);outline-offset:1px}
 
   .masthead{padding:46px 0 6px}
@@ -63,7 +93,7 @@
   /* questions */
   .q{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:24px 24px 26px;margin-bottom:14px}
   .q-head{display:flex;align-items:center;gap:11px;margin-bottom:7px}
-  .q-num{width:24px;height:24px;border-radius:50%;background:var(--green);color:var(--black);
+  .q-num{width:24px;height:24px;border-radius:50%;background:var(--green);color:var(--on-brand);
     font-size:12px;font-weight:700;display:grid;place-items:center;flex:none}
   .q h2{font-size:1.22rem}
   .q-note{color:var(--muted);font-size:.9rem;margin:6px 0 18px;max-width:64ch}
@@ -101,7 +131,7 @@
   input[type=range]::-moz-range-track{height:5px;background:var(--rule);border-radius:99px}
   input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;
     border-radius:50%;background:var(--card);border:3px solid var(--green);margin-top:-8px;
-    box-shadow:0 1px 4px rgba(29,29,29,.2)}
+    box-shadow:0 1px 4px rgba(0,0,0,.2)}
   input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--card);border:3px solid var(--green)}
   input[type=range]:focus-visible::-webkit-slider-thumb{outline:2px solid var(--black);outline-offset:2px}
   input[type=range].r-mkt::-webkit-slider-thumb{border-color:var(--blue)}
@@ -143,29 +173,78 @@
   .fxbad{color:var(--warn);font-weight:500}
 
   /* receipt */
-  .rcol{position:sticky;top:18px}
-  @media (max-width:980px){ .rcol{position:static} }
+  /* The quote panel scrolls inside its own column so the whole receipt stays
+     reachable on a short screen, with the headline total pinned to the bottom. */
+  .rcol{position:sticky;top:18px;max-height:calc(100vh - 36px);overflow-y:auto;
+    overscroll-behavior:contain;scrollbar-width:thin}
+  .rcol .totals{position:sticky;bottom:0;z-index:2;
+    box-shadow:0 -8px 18px -12px rgba(0,0,0,.30)}
+  @media (max-width:980px){
+    .rcol{position:static;max-height:none;overflow:visible}
+    .rcol .totals{position:static;box-shadow:none}
+  }
   .receipt{background:var(--card);border:1px solid var(--rule);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
   .r-head{padding:22px 24px 18px;background:var(--green-soft)}
   .r-head h2{font-size:1.6rem;margin-top:6px}
   .bar-right{display:flex;align-items:center;gap:10px}
-  #langPick{font-family:var(--font);font-size:12px;font-weight:600;color:var(--black);
-    background:rgba(255,255,255,.7);border:1px solid rgba(29,29,29,.16);border-radius:999px;
-    padding:5px 10px;cursor:pointer}
-  #langPick:focus-visible{outline:2px solid var(--black);outline-offset:1px}
-  .planpick{display:flex;gap:5px;margin-top:13px;background:rgba(255,255,255,.55);
+  .themebtn{display:flex;align-items:center;justify-content:center;width:34px;height:34px;
+    flex:none;border:1.5px solid var(--hair-2);border-radius:999px;background:var(--wash-2);
+    color:var(--black);cursor:pointer;padding:0}
+  .themebtn svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7;
+    stroke-linecap:round;stroke-linejoin:round}
+  .themebtn .i-moon{display:none}
+  :root[data-theme="dark"] .themebtn .i-sun{display:none}
+  :root[data-theme="dark"] .themebtn .i-moon{display:block}
+  .themebtn:focus-visible{outline:2px solid var(--black);outline-offset:2px}
+  .langbox{display:flex;align-items:center;gap:7px;background:var(--blue-soft);
+    border:1.5px solid var(--blue);border-radius:999px;padding:4px 12px 4px 11px;
+    box-shadow:0 1px 0 rgba(0,0,0,.04)}
+  .langbox svg{width:16px;height:16px;flex:none;fill:none;stroke:var(--black);
+    stroke-width:1.6;stroke-linecap:round}
+  #langPick{font-family:var(--font);font-size:13px;font-weight:700;color:var(--black);
+    background:transparent;border:0;padding:3px 2px;cursor:pointer;max-width:170px}
+  #langPick:focus-visible{outline:2px solid var(--black);outline-offset:3px;border-radius:4px}
+  @media (max-width:640px){ .langbox{padding:3px 9px} #langPick{font-size:12px;max-width:120px} }
+  .r-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+  .ccybox select{font-family:var(--font);font-size:12px;font-weight:700;color:var(--black);
+    background:var(--wash-2);border:1.5px solid var(--black);border-radius:999px;
+    padding:4px 9px;cursor:pointer;max-width:210px}
+  .ccybox select:focus-visible{outline:2px solid var(--black);outline-offset:2px}
+  .grand-alt{display:block;font-size:12.5px;font-weight:600;color:var(--muted);
+    margin-top:3px;font-variant-numeric:tabular-nums}
+  .disc{padding:13px 17px 0;border-top:1px solid var(--hair)}
+  .disc label{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .disc-in{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .disc-in .num{width:74px}
+  .disc-pct{font-weight:700;font-size:14px;margin-left:-4px}
+  .disc-note{font-size:11.5px;color:var(--muted);line-height:1.3;flex:1 1 100%}
+  .disc-rows{margin-top:9px;border-top:1px solid var(--hair)}
+  .drow.fixed .dlab,.drow.fixed .damt{opacity:.55}
+  .drow.fixed .num{background:var(--sunken);color:var(--muted);cursor:not-allowed}
+  .drow{display:flex;align-items:center;gap:8px;padding:6px 0;
+    border-bottom:1px solid var(--hair)}
+  .drow .dlab{flex:1;font-size:12.5px;line-height:1.3}
+  .drow .damt{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .drow .num{width:58px;padding:4px 6px;font-size:12.5px;text-align:right}
+  .drow .dpc{font-size:12px;color:var(--muted)}
+  .disc-out{margin-top:10px;font-size:13px;line-height:1.5;background:var(--green-soft);
+    border-radius:10px;padding:9px 12px}
+  .disc-out b{font-weight:700}
+  .disc-out .was{text-decoration:line-through;opacity:.55}
+  .planpick{display:flex;gap:5px;margin-top:13px;background:var(--wash);
     border-radius:999px;padding:4px}
   .planpick button{flex:1;font-family:var(--font);font-size:12px;font-weight:600;padding:6px 4px;
     border:0;background:transparent;color:var(--ink-soft);cursor:pointer;border-radius:999px;white-space:nowrap}
-  .planpick button[aria-pressed="true"]{background:var(--black);color:#fff}
+  .planpick button[aria-pressed="true"]{background:var(--black);color:var(--on-ink)}
   .planpick button:focus-visible{outline:2px solid var(--black);outline-offset:1px}
-  .pinned{background:var(--yellow);color:var(--black);font-size:12px;font-weight:500;
+  .pinned{background:var(--yellow);color:var(--on-brand);font-size:12px;font-weight:500;
     padding:10px 24px;line-height:1.45}
   .pinned[hidden]{display:none}
   .pinned b{font-weight:700}
   .verdict{margin:11px 0 0;font-size:.88rem;color:var(--ink-soft)}
   .verdict b{color:var(--black);font-weight:700}
-  .warnbar{background:var(--warn);color:#fff;font-size:12px;font-weight:500;padding:9px 24px;line-height:1.4}
+  .warnbar{background:var(--warn);color:var(--on-warn);font-size:12px;font-weight:500;padding:9px 24px;line-height:1.4}
   .warnbar[hidden]{display:none}
   .lines{padding:4px 24px}
   .ghead{font-size:10.5px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);padding:16px 0 7px}
@@ -180,7 +259,7 @@
   .stot{display:grid;grid-template-columns:1fr auto;gap:12px;padding:11px 0 13px;margin-top:2px;
     border-top:1.5px solid var(--rule);font-size:.88rem;font-weight:500;color:var(--ink-soft)}
   .stot .v{color:var(--black);font-weight:700;font-variant-numeric:tabular-nums}
-  .totals{padding:18px 24px 22px;border-top:1px solid var(--rule);background:#fbfdfc}
+  .totals{padding:18px 24px 22px;border-top:1px solid var(--rule);background:var(--totals-bg)}
   .grand{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
   .grand .l{font-weight:700;font-size:1rem}
   .grand .l small{display:block;font-size:11px;font-weight:500;letter-spacing:.08em;
@@ -203,7 +282,7 @@
   .btn:hover{background:var(--green-soft);border-color:var(--green)}
   .btn:focus-visible{outline:2px solid var(--black);outline-offset:2px}
   .btn.pri{background:var(--green);border-color:var(--green)}
-  .btn.pri:hover{background:var(--black);color:#fff;border-color:var(--black)}
+  .btn.pri:hover{background:var(--black);color:var(--on-ink);border-color:var(--black)}
 
   /* plans */
   .section{padding:44px 0 10px;border-top:1px solid var(--rule)}
@@ -223,12 +302,12 @@
   .p-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
   .plan h3{font-size:1.3rem}
   .tag{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 9px;
-    border-radius:999px;background:var(--yellow);color:var(--black);white-space:nowrap}
+    border-radius:999px;background:var(--yellow);color:var(--on-brand);white-space:nowrap}
   .tag.no{background:transparent;border:1.5px solid var(--muted);color:var(--muted)}
   .p-tot{font-weight:700;font-size:1.9rem;letter-spacing:-.035em;font-variant-numeric:tabular-nums}
   .p-tot small{display:block;font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;
     color:var(--muted);margin-top:5px}
-  .p-facts{margin:0;padding:13px 0 0;list-style:none;font-size:.87rem;border-top:1px solid rgba(29,29,29,.1)}
+  .p-facts{margin:0;padding:13px 0 0;list-style:none;font-size:.87rem;border-top:1px solid var(--hair-2)}
   .p-facts li{padding:4px 0;display:flex;gap:8px}
   .p-facts li::before{content:"\00b7";font-weight:700;flex:none}
   .p-why{font-size:.85rem;font-weight:500;margin:0}
@@ -244,9 +323,9 @@
   @media (max-width:980px){
     body{padding-bottom:70px}
     .mbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:20;align-items:center;
-      justify-content:space-between;gap:14px;background:var(--black);color:#fff;padding:13px 22px}
+      justify-content:space-between;gap:14px;background:var(--black);color:var(--on-ink);padding:13px 22px}
     .mbar .l{font-size:10.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#9aa39f}
-    .mbar .l b{display:block;font-size:.95rem;letter-spacing:0;text-transform:none;color:#fff;font-weight:700;margin-top:2px}
+    .mbar .l b{display:block;font-size:.95rem;letter-spacing:0;text-transform:none;color:var(--on-ink);font-weight:700;margin-top:2px}
     .mbar .v{font-weight:700;font-size:1.4rem;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
   }
   @media (prefers-reduced-motion:reduce){ *{animation:none!important;transition:none!important} }
@@ -257,6 +336,16 @@
     .q,.receipt,.plan{break-inside:avoid}
   }
 </style>
+<script>
+  /* Set the theme before first paint so the page never flashes the wrong one.
+     Stored choice wins; otherwise follow the operating system. */
+  (function(){
+    var t = null;
+    try { t = localStorage.getItem("wati-theme"); } catch(e){}
+    // Light is the default everywhere; dark is opt-in and remembered per browser.
+    document.documentElement.setAttribute("data-theme", t === "dark" ? "dark" : "light");
+  })();
+</script>
 </head>
 <body>
 <div class="topbar">
@@ -268,15 +357,26 @@
 <span class="regionpill">Indonesia</span>
 </div>
     <div class="bar-right">
-      <label for="langPick" class="sr">Language</label>
-      <select id="langPick" hidden></select>
+      <button type="button" class="themebtn" id="themeBtn" aria-pressed="false" title="Dark mode">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="i-sun">
+          <circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.4M12 19.6V22M2 12h2.4M19.6 12H22M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M19.1 4.9l-1.7 1.7M6.6 17.4l-1.7 1.7"/></svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="i-moon">
+          <path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2Z"/></svg>
+        <span class="sr">Toggle dark mode</span>
+      </button>
+      <div class="langbox" id="langBox" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/>
+          <path d="M3 12h18M12 3c2.6 2.7 2.6 15.3 0 18M12 3c-2.6 2.7-2.6 15.3 0 18"/></svg>
+        <label for="langPick" class="sr">Language</label>
+        <select id="langPick"></select>
+      </div>
       <div class="cycle" id="cycleBar" role="group" aria-label="Billing cycle"></div>
     </div>
 </div>
 </div>
 <header class="wrap masthead">
 <h1 id="headline" data-i18n="t001" data-i18n-skip="1">Work out what WhatsApp will <mark>actually</mark> cost you each month.</h1>
-<p class="lede" data-i18n="lede">Answer nine quick questions. Your bill itemises itself as you go — plan fee, users,
+<p class="lede" data-i18n="lede">Answer eight quick questions. Your bill itemises itself as you go — plan fee, users,
     add-ons and every message category at its real per-message rate. Then pick the currency you want
     the quote in and take it away as a PDF.</p>
 </header>
@@ -476,18 +576,18 @@
 </div>
 </section>
 <section class="q">
-<div class="q-head"><span class="q-num">9</span><h2 data-i18n="q9h">Show the quote in</h2></div>
-<p class="q-note">Wati bills this region in IDR. Pick your customer's local currency and the whole
-        bill converts at today's rate — useful when the person you're quoting thinks in their own money.</p>
-<label class="sr" for="outCcy">Output currency</label>
-<select id="outCcy"></select>
-<div class="fxline" id="fxline"></div>
 </section>
 </form>
 <aside aria-label="Cost estimate" class="rcol">
 <div class="receipt">
 <div class="r-head">
+<div class="r-top">
 <span class="label" data-i18n="t047">Estimated monthly cost</span>
+<div class="ccybox">
+<label class="sr" for="outCcy">Output currency</label>
+<select id="outCcy"></select>
+</div>
+</div>
 <h2 data-i18n="t048" id="planName">Wati Pro</h2>
 <p class="verdict" id="verdict"></p>
 <div aria-label="Which plan to quote" class="planpick" id="planPick" role="group">
@@ -501,10 +601,22 @@
 <div class="warnbar" hidden="" id="warnbar"></div>
 <div class="lines" id="lines"></div>
 <div class="totals">
+<div class="fxline" id="fxline"></div>
+<div class="disc">
+<label for="discNum" data-i18n="discLabel">Discount you can offer</label>
+<div class="disc-in">
+<input class="num" type="number" id="discNum" min="0" max="100" step="1" value="0" aria-label="Discount percent">
+<span class="disc-pct">%</span>
+<span class="disc-note" data-i18n="discApplies">on the whole package — override any line below</span>
+</div>
+<div class="disc-rows" id="discRows"></div>
+<div class="disc-out" id="discOut" hidden></div>
+</div>
 <div class="grand">
 <span class="l" data-i18n="t053">Total per month<small id="cycleLabel">plan billed annually</small></span>
 <span class="v num" id="grand">—</span>
 </div>
+<div class="grand-alt" id="grandAlt" hidden></div>
 <div aria-label="What the cost is made of" class="comp" id="comp" role="img"><i></i><i></i><i></i><i></i></div>
 <div class="clegend" id="clegend"></div>
 </div>
@@ -534,7 +646,7 @@
       Per-message rates come from the Wati usage rate card that applies to this region, effective
       1 October 2026, and are charged on the recipient's country. Each plan tier has its own rates —
       the higher tiers are cheaper per message.</li>
-<li>Message rates are quoted in USD on the rate card. Where the plan is billed in another currency, the two are converted into your chosen output currency at today's rate, shown under question 9. Service messages have their own per-country rate, lower than the utility rate.</li>
+<li>Message rates are quoted in USD on the rate card. Where the plan is billed in another currency, the two are converted into the currency picked at the top of the quote panel, at today's rate. Service messages have their own per-country rate, lower than the utility rate.</li>
 <li data-i18n="t061">The rate cards this calculator is built from are linked under question 1, so you can open the
       source document on a call rather than quoting from memory.</li>
 <li data-i18n="t062">The estimate picks the cheapest plan that meets your requirements, but you can pin a specific
@@ -568,7 +680,7 @@
   /* ============================================================
      Region configuration, generated at build time.
      ============================================================ */
-  var CONFIG = {"region": "Indonesia", "card": "E", "planCcy": "IDR", "planSymbol": "Rp", "cycles": [{"key": "annual", "label": "Annual", "sub": "plan billed annually"}, {"key": "quarterly", "label": "Quarterly", "sub": "plan billed quarterly"}, {"key": "monthly", "label": "Monthly", "sub": "plan billed monthly"}], "rateCcy": "USD", "rateSymbol": "$", "payg": null, "plans": {"growth": {"label": "Growth", "prices": {"annual": 740000, "quarterly": 930000, "monthly": 930000}, "seats": 3, "extraSeat": null, "triggers": 1000, "aiCredits": 2000, "broadcastCap": 15000, "numbers": 1, "advanced": false}, "pro": {"label": "Pro", "prices": {"annual": 1500000, "quarterly": 1875000, "monthly": 1875000}, "seats": 5, "extraSeat": 460000, "triggers": 2000, "aiCredits": 5000, "broadcastCap": null, "numbers": 1, "advanced": true}, "business": {"label": "Business", "prices": {"annual": 3800000, "quarterly": 4750000, "monthly": 4750000}, "seats": 5, "extraSeat": 1120000, "triggers": 5000, "aiCredits": 20000, "broadcastCap": null, "numbers": null, "advanced": true}}, "extraNumber": 540000, "shopifyUsd": 4.99, "currencies": [{"country": "Indonesia", "ccy": "IDR"}], "fallbackRates": {"AED": 3.6725, "AFN": 65.108, "ALL": 80.47, "AMD": 365.99, "ANG": 1.79, "AOA": 917.45, "ARS": 1491.32, "AUD": 1.4168, "AWG": 1.7901, "AZN": 1.6995, "BAM": 1.6942, "BBD": 2.0327, "BDT": 123.31, "BGN": 1.6942, "BHD": 0.376, "BIF": 2995.47, "BMD": 1.0, "BND": 1.2798, "BOB": 11.7309, "BRL": 5.159, "BSD": 1.0105, "BTN": 95.35, "BWP": 13.2298, "BYN": 2.9674, "BZD": 2.0317, "CAD": 1.3927, "CDF": 2278.48, "CHF": 0.8118, "CLP": 913.97, "CNY": 6.741, "COP": 3129.33, "CRC": 451.38, "CUP": 24.0, "CVE": 95.51, "CZK": 21.01, "DJF": 177.24, "DKK": 6.4776, "DOP": 59.2, "DZD": 132.93, "EGP": 50.197, "ERN": 15.2284, "ETB": 160.46, "EUR": 0.86621, "FJD": 2.2187, "FKP": 0.74026, "GBP": 0.74026, "GEL": 2.6135, "GGP": 0.74026, "GHS": 11.6183, "GIP": 0.74768, "GMD": 73.336, "GNF": 8270, "GTQ": 7.628, "GYD": 210.97, "HKD": 7.8533, "HNL": 26.814, "HTG": 130.71, "HUF": 315.7, "IDR": 17850, "ILS": 2.9926, "IMP": 0.74026, "INR": 95.35, "IQD": 1309.61, "IRR": 1370869, "ISK": 122.98, "JEP": 0.74026, "JMD": 157.0, "JOD": 0.709, "JPY": 159.27, "KES": 129.1, "KGS": 87.47, "KHR": 4051.61, "KMF": 426.67, "KRW": 1416.19, "KWD": 0.30781, "KYD": 0.8372, "KZT": 465.56, "LAK": 22518, "LBP": 89899, "LKR": 333.63, "LRD": 181.74, "LSL": 16.15, "LYD": 6.3708, "MAD": 9.3001, "MDL": 17.3256, "MGA": 4281.72, "MKD": 53.307, "MMK": 2097.84, "MNT": 3596.39, "MOP": 8.0889, "MRU": 40.128, "MUR": 47.13, "MVR": 15.3995, "MWK": 1737.0, "MXN": 17.0699, "MYR": 4.0867, "MZN": 63.635, "NAD": 16.1578, "NGN": 1362.05, "NIO": 36.779, "NOK": 9.4901, "NPR": 152.58, "NZD": 1.7046, "OMR": 0.3845, "PEN": 3.3669, "PGK": 4.4256, "PHP": 61.188, "PKR": 278.35, "PLN": 3.7291, "PYG": 5967, "QAR": 3.64, "RON": 4.5408, "RSD": 101.69, "RUB": 82.76, "RWF": 1471.74, "SAR": 3.75, "SBD": 8.0122, "SCR": 14.2034, "SDG": 600.15, "SEK": 9.5305, "SGD": 1.2798, "SHP": 0.74026, "SLE": 24.483, "SOS": 571.47, "SRD": 37.943, "SSP": 5372, "STN": 21.335, "SYP": 122.03, "SZL": 16.1582, "THB": 33.078, "TJS": 9.2376, "TMT": 3.5, "TND": 2.9316, "TOP": 2.3642, "TRY": 47.751, "TTD": 6.747, "TWD": 32.209, "TZS": 2642.62, "UAH": 44.724, "UGX": 3717.53, "USD": 1, "UYU": 40.262, "UZS": 11923, "VES": 762.7, "VND": 26034, "VUV": 117.19, "WST": 2.7118, "XAF": 568.2, "XCD": 2.7392, "XCG": 1.7962, "XOF": 568.2, "XPF": 103.4, "YER": 237.22, "ZAR": 16.1342, "ZMW": 18.7468, "ZWG": 26.57}, "fallbackAsOf": "13 August 2026", "serviceFree": 1000, "rateCards": {"folder": "https://drive.google.com/drive/folders/17kJ975f7h7jEdz_sSj0nAeWSUB12asgK", "effective": "1 October 2026", "items": [{"label": "Growth & Pro", "card": "Wati-Pricing-Rate-Card-Growth-Plan-Pro-Plan-USD-E.pdf", "url": "https://drive.google.com/file/d/1lwkuIkAnjLJexinXCcziL7Ld2H5sTP98/view"}, {"label": "Business", "card": "Wati-Pricing-Rate-Card-Business-Plan-USD-E.pdf", "url": "https://drive.google.com/file/d/1-EOdf_0ASAL-eVichc8mQsbnfAd-xWoV/view"}]}, "addons": [{"k": "opscope", "label": "Operator scope", "unit": "user", "p": 180000.0, "hint": "Each operator only sees the conversations assigned to them, instead of the whole shared inbox. Used when teams or territories must not see each other’s chats.", "url": "https://support.wati.io/en/articles/11865694-how-to-manage-chat-visibility-to-restrict-access-to-assigned-conversations", "minPlan": "pro"}, {"k": "opprivacy", "label": "Operator privacy", "unit": "user", "p": 180000.0, "hint": "Hides the customer’s contact details from operators while they chat. Common where the number itself is the sensitive asset.", "url": "https://support.wati.io/en/articles/11463006-how-to-hide-or-mask-customer-phone-numbers-in-wati", "minPlan": "pro"}, {"k": "masking", "label": "Phone number masking", "unit": "user", "p": 180000.0, "hint": "Masks the customer’s phone number in the inbox so agents can reply without seeing it. Usually bought for compliance or to stop agents taking business off-platform.", "url": "https://support.wati.io/en/articles/11463006-how-to-hide-or-mask-customer-phone-numbers-in-wati", "minPlan": "pro"}, {"k": "roundrobin", "label": "Round-robin chat assignment", "unit": "user", "p": 180000.0, "hint": "Shares incoming chats out evenly across available agents rather than leaving them unassigned. Keeps response times level across a shift.", "url": "https://support.wati.io/en/articles/14270796-how-to-use-round-robin-assignment-for-chats-in-wati", "minPlan": "pro"}, {"k": "blitz", "label": "Blitz — 200 messages/second", "unit": "month", "p": 3600000.0, "hint": "Lifts broadcast send speed to 200 messages a second. Matters for time-critical sends such as flash sales and match-day alerts.", "url": "https://support.wati.io/en/articles/11463452-is-there-a-limit-to-broadcast-messages", "minPlan": "business"}, {"k": "apilimit", "label": "API monthly limit increase", "unit": "month", "p": 3600000.0, "hint": "Raises the monthly API ceiling to 40 million calls. For high-volume integrations that would otherwise hit the plan’s cap.", "url": "https://support.wati.io/en/articles/11823158-understanding-wati-apis-and-their-usage-limits", "minPlan": "business"}, {"k": "apihigh", "label": "API high volume", "unit": "month", "p": 3600000.0, "hint": "Raises the burst limit to 200 API calls every 10 seconds. For systems that fire a lot of requests at once rather than a lot over a month.", "url": "https://support.wati.io/en/articles/11823158-understanding-wati-apis-and-their-usage-limits", "minPlan": "pro"}, {"k": "ctwa", "label": "Click-to-WhatsApp ads", "unit": "month", "p": 1800000.0, "hint": "Tracks clicks from Facebook and Instagram ads into WhatsApp and attributes the resulting conversations, including the analytics dashboard and Google Ads.", "url": "https://support.wati.io/en/collections/13040159-ctwa-click-to-whatsapp-ads", "minPlan": "growth", "free": ["pro", "business"]}, {"k": "forms", "label": "Forms", "unit": "month", "p": 1800000.0, "hint": "Up to 25 WhatsApp forms, so customers fill in structured fields inside the chat. Used for bookings, applications and lead qualification.", "url": "https://support.wati.io/en/articles/11463180-how-to-create-and-use-whatsapp-flows-in-wati", "minPlan": "business"}], "sessionTiers": [[1000, 450000.0], [2000, 900000.0], [3000, 1350000.0], [4000, 1800000.0], [6000, 2700000.0], [8000, 3240000.0], [10000, 4050000.0], [15000, 5400000.0], [20000, 7200000.0], [30000, 9450000.0], [40000, 11700000.0], [50000, 14400000.0], [75000, 18900000.0], [100000, 23850000.0], [150000, 31500000.0], [200000, 39600000.0], [250000, 47250000.0], [300000, 54900000.0], [400000, 67500000.0], [500000, 79920000.0], [750000, 104850000.0], [1000000, 129600000.0]], "aiTiers": [[2000, 360000.0], [4000, 720000.0], [6000, 1080000.0], [8000, 1440000.0], [10000, 1800000.0], [12000, 2160000.0], [14000, 2520000.0], [16000, 2880000.0], [18000, 3240000.0], [20000, 3600000.0], [22000, 3960000.0], [24000, 4320000.0], [26000, 4680000.0], [28000, 5040000.0], [30000, 5400000.0], [32000, 5760000.0], [34000, 6120000.0], [36000, 6480000.0], [38000, 6840000.0], [40000, 7200000.0], [42000, 7560000.0], [44000, 7920000.0], [46000, 8280000.0], [48000, 8640000.0], [50000, 9000000.0], [52000, 9360000.0], [54000, 9720000.0], [56000, 10080000.0], [58000, 10440000.0], [60000, 10800000.0], [62000, 11160000.0], [64000, 11520000.0], [66000, 11880000.0], [68000, 12240000.0], [70000, 12600000.0], [72000, 12960000.0], [74000, 13320000.0], [76000, 13680000.0], [78000, 14040000.0], [80000, 14400000.0], [82000, 14760000.0], [84000, 15120000.0], [86000, 15480000.0], [88000, 15840000.0], [90000, 16200000.0], [92000, 16560000.0], [94000, 16920000.0], [96000, 17280000.0], [98000, 17640000.0], [100000, 18000000.0]], "aiTop": 18360000.0};
+  var CONFIG = {"region": "Indonesia", "card": "E", "planCcy": "IDR", "planSymbol": "Rp", "cycles": [{"key": "annual", "label": "Annual", "sub": "plan billed annually"}, {"key": "quarterly", "label": "Quarterly", "sub": "plan billed quarterly"}, {"key": "monthly", "label": "Monthly", "sub": "plan billed monthly"}], "rateCcy": "USD", "rateSymbol": "$", "payg": null, "plans": {"growth": {"label": "Growth", "prices": {"annual": 740000, "quarterly": 930000, "monthly": 930000}, "seats": 3, "extraSeat": null, "triggers": 1000, "aiCredits": 2000, "broadcastCap": 15000, "numbers": 1, "advanced": false}, "pro": {"label": "Pro", "prices": {"annual": 1500000, "quarterly": 1875000, "monthly": 1875000}, "seats": 5, "extraSeat": 460000, "triggers": 2000, "aiCredits": 5000, "broadcastCap": null, "numbers": 1, "advanced": true}, "business": {"label": "Business", "prices": {"annual": 3800000, "quarterly": 4750000, "monthly": 4750000}, "seats": 5, "extraSeat": 1120000, "triggers": 5000, "aiCredits": 20000, "broadcastCap": null, "numbers": null, "advanced": true}}, "extraNumber": 540000, "shopifyUsd": 4.99, "currencies": [{"country": "Indonesia", "ccy": "IDR"}], "fallbackRates": {"AED": 3.6725, "AFN": 65.108, "ALL": 80.47, "AMD": 365.99, "ANG": 1.79, "AOA": 917.45, "ARS": 1491.32, "AUD": 1.4168, "AWG": 1.7901, "AZN": 1.6995, "BAM": 1.6942, "BBD": 2.0327, "BDT": 123.31, "BGN": 1.6942, "BHD": 0.376, "BIF": 2995.47, "BMD": 1.0, "BND": 1.2798, "BOB": 11.7309, "BRL": 5.159, "BSD": 1.0105, "BTN": 95.35, "BWP": 13.2298, "BYN": 2.9674, "BZD": 2.0317, "CAD": 1.3927, "CDF": 2278.48, "CHF": 0.8118, "CLP": 913.97, "CNY": 6.741, "COP": 3129.33, "CRC": 451.38, "CUP": 24.0, "CVE": 95.51, "CZK": 21.01, "DJF": 177.24, "DKK": 6.4776, "DOP": 59.2, "DZD": 132.93, "EGP": 50.197, "ERN": 15.2284, "ETB": 160.46, "EUR": 0.86621, "FJD": 2.2187, "FKP": 0.74026, "GBP": 0.74026, "GEL": 2.6135, "GGP": 0.74026, "GHS": 11.6183, "GIP": 0.74768, "GMD": 73.336, "GNF": 8270, "GTQ": 7.628, "GYD": 210.97, "HKD": 7.8533, "HNL": 26.814, "HTG": 130.71, "HUF": 315.7, "IDR": 17850, "ILS": 2.9926, "IMP": 0.74026, "INR": 95.35, "IQD": 1309.61, "IRR": 1370869, "ISK": 122.98, "JEP": 0.74026, "JMD": 157.0, "JOD": 0.709, "JPY": 159.27, "KES": 129.1, "KGS": 87.47, "KHR": 4051.61, "KMF": 426.67, "KRW": 1416.19, "KWD": 0.30781, "KYD": 0.8372, "KZT": 465.56, "LAK": 22518, "LBP": 89899, "LKR": 333.63, "LRD": 181.74, "LSL": 16.15, "LYD": 6.3708, "MAD": 9.3001, "MDL": 17.3256, "MGA": 4281.72, "MKD": 53.307, "MMK": 2097.84, "MNT": 3596.39, "MOP": 8.0889, "MRU": 40.128, "MUR": 47.13, "MVR": 15.3995, "MWK": 1737.0, "MXN": 17.0699, "MYR": 4.0867, "MZN": 63.635, "NAD": 16.1578, "NGN": 1362.05, "NIO": 36.779, "NOK": 9.4901, "NPR": 152.58, "NZD": 1.7046, "OMR": 0.3845, "PEN": 3.3669, "PGK": 4.4256, "PHP": 61.188, "PKR": 278.35, "PLN": 3.7291, "PYG": 5967, "QAR": 3.64, "RON": 4.5408, "RSD": 101.69, "RUB": 82.76, "RWF": 1471.74, "SAR": 3.75, "SBD": 8.0122, "SCR": 14.2034, "SDG": 600.15, "SEK": 9.5305, "SGD": 1.2798, "SHP": 0.74026, "SLE": 24.483, "SOS": 571.47, "SRD": 37.943, "SSP": 5372, "STN": 21.335, "SYP": 122.03, "SZL": 16.1582, "THB": 33.078, "TJS": 9.2376, "TMT": 3.5, "TND": 2.9316, "TOP": 2.3642, "TRY": 47.751, "TTD": 6.747, "TWD": 32.209, "TZS": 2642.62, "UAH": 44.724, "UGX": 3717.53, "USD": 1, "UYU": 40.262, "UZS": 11923, "VES": 762.7, "VND": 26034, "VUV": 117.19, "WST": 2.7118, "XAF": 568.2, "XCD": 2.7392, "XCG": 1.7962, "XOF": 568.2, "XPF": 103.4, "YER": 237.22, "ZAR": 16.1342, "ZMW": 18.7468, "ZWG": 26.57}, "fallbackAsOf": "13 August 2026", "serviceFree": 1000, "rateCards": {"folder": "https://drive.google.com/drive/folders/17kJ975f7h7jEdz_sSj0nAeWSUB12asgK", "effective": "1 October 2026", "items": [{"label": "Growth & Pro", "card": "Wati-Pricing-Rate-Card-Growth-Plan-Pro-Plan-USD-E.pdf", "url": "https://drive.google.com/file/d/1lwkuIkAnjLJexinXCcziL7Ld2H5sTP98/view"}, {"label": "Business", "card": "Wati-Pricing-Rate-Card-Business-Plan-USD-E.pdf", "url": "https://drive.google.com/file/d/1-EOdf_0ASAL-eVichc8mQsbnfAd-xWoV/view"}]}, "addons": [{"k": "opscope", "label": "Operator scope", "unit": "user", "p": 180000.0, "hint": "Each operator only sees the conversations assigned to them, instead of the whole shared inbox. Used when teams or territories must not see each other’s chats.", "url": "https://support.wati.io/en/articles/11865694-how-to-manage-chat-visibility-to-restrict-access-to-assigned-conversations", "minPlan": "pro"}, {"k": "opprivacy", "label": "Operator privacy", "unit": "user", "p": 180000.0, "hint": "Hides the customer’s contact details from operators while they chat. Common where the number itself is the sensitive asset.", "url": "https://support.wati.io/en/articles/11463006-how-to-hide-or-mask-customer-phone-numbers-in-wati", "minPlan": "pro"}, {"k": "masking", "label": "Phone number masking", "unit": "user", "p": 180000.0, "hint": "Masks the customer’s phone number in the inbox so agents can reply without seeing it. Usually bought for compliance or to stop agents taking business off-platform.", "url": "https://support.wati.io/en/articles/11463006-how-to-hide-or-mask-customer-phone-numbers-in-wati", "minPlan": "pro"}, {"k": "roundrobin", "label": "Round-robin chat assignment", "unit": "user", "p": 180000.0, "hint": "Shares incoming chats out evenly across available agents rather than leaving them unassigned. Keeps response times level across a shift.", "url": "https://support.wati.io/en/articles/14270796-how-to-use-round-robin-assignment-for-chats-in-wati", "minPlan": "pro"}, {"k": "blitz", "label": "Blitz — 200 messages/second", "unit": "month", "p": 3600000.0, "hint": "Lifts broadcast send speed to 200 messages a second. Matters for time-critical sends such as flash sales and match-day alerts.", "url": "https://support.wati.io/en/articles/11463452-is-there-a-limit-to-broadcast-messages", "minPlan": "business"}, {"k": "apilimit", "label": "API monthly limit increase", "unit": "month", "p": 3600000.0, "hint": "Raises the monthly API ceiling to 40 million calls. For high-volume integrations that would otherwise hit the plan’s cap.", "url": "https://support.wati.io/en/articles/11823158-understanding-wati-apis-and-their-usage-limits", "minPlan": "business"}, {"k": "apihigh", "label": "API high volume", "unit": "month", "p": 3600000.0, "hint": "Raises the burst limit to 200 API calls every 10 seconds. For systems that fire a lot of requests at once rather than a lot over a month.", "url": "https://support.wati.io/en/articles/11823158-understanding-wati-apis-and-their-usage-limits", "minPlan": "pro"}, {"k": "ctwa", "label": "Click-to-WhatsApp ads", "unit": "month", "p": 1800000.0, "hint": "Tracks clicks from Facebook and Instagram ads into WhatsApp and attributes the resulting conversations, including the analytics dashboard and Google Ads.", "url": "https://support.wati.io/en/collections/13040159-ctwa-click-to-whatsapp-ads", "minPlan": "growth", "free": ["pro", "business"]}, {"k": "forms", "label": "Forms", "unit": "month", "p": 1800000.0, "hint": "Up to 25 WhatsApp forms, so customers fill in structured fields inside the chat. Used for bookings, applications and lead qualification.", "url": "https://support.wati.io/en/articles/11463180-how-to-create-and-use-whatsapp-flows-in-wati", "minPlan": "business"}], "sessionTiers": [[1000, 450000.0], [2000, 900000.0], [3000, 1350000.0], [4000, 1800000.0], [6000, 2700000.0], [8000, 3240000.0], [10000, 4050000.0], [15000, 5400000.0], [20000, 7200000.0], [30000, 9450000.0], [40000, 11700000.0], [50000, 14400000.0], [75000, 18900000.0], [100000, 23850000.0], [150000, 31500000.0], [200000, 39600000.0], [250000, 47250000.0], [300000, 54900000.0], [400000, 67500000.0], [500000, 79920000.0], [750000, 104850000.0], [1000000, 129600000.0]], "aiTiers": [[2000, 360000.0], [4000, 720000.0], [6000, 1080000.0], [8000, 1440000.0], [10000, 1800000.0], [12000, 2160000.0], [14000, 2520000.0], [16000, 2880000.0], [18000, 3240000.0], [20000, 3600000.0], [22000, 3960000.0], [24000, 4320000.0], [26000, 4680000.0], [28000, 5040000.0], [30000, 5400000.0], [32000, 5760000.0], [34000, 6120000.0], [36000, 6480000.0], [38000, 6840000.0], [40000, 7200000.0], [42000, 7560000.0], [44000, 7920000.0], [46000, 8280000.0], [48000, 8640000.0], [50000, 9000000.0], [52000, 9360000.0], [54000, 9720000.0], [56000, 10080000.0], [58000, 10440000.0], [60000, 10800000.0], [62000, 11160000.0], [64000, 11520000.0], [66000, 11880000.0], [68000, 12240000.0], [70000, 12600000.0], [72000, 12960000.0], [74000, 13320000.0], [76000, 13680000.0], [78000, 14040000.0], [80000, 14400000.0], [82000, 14760000.0], [84000, 15120000.0], [86000, 15480000.0], [88000, 15840000.0], [90000, 16200000.0], [92000, 16560000.0], [94000, 16920000.0], [96000, 17280000.0], [98000, 17640000.0], [100000, 18000000.0]], "aiTop": 18360000.0, "homeIsos": ["ID"], "defaultCountry": "ID", "defaultOutCcy": "IDR"};
 
   /* Per-country per-message rates from the region's usage rate card
      (1 October 2026), in CONFIG.rateCcy.  Nine numbers per country:
@@ -577,7 +689,11 @@
   var RATES = {AF:[0.1053,0.0147,0.0147,0.1053,0.0147,0.0147,0.0994,0.0136,0.0136,0.0136,0.0136,0.0121],AL:[0.1075,0.0276,0.0276,0.1075,0.0276,0.0276,0.1015,0.0254,0.0254,0.0254,0.0254,0.0227],DZ:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],AS:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],AD:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],AO:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],AI:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],AQ:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],AG:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],AR:[0.0773,0.0338,0.0338,0.0773,0.0338,0.0338,0.0729,0.0312,0.0312,0.0312,0.0312,0.0278],AM:[0.1075,0.0276,0.0276,0.1075,0.0276,0.0276,0.1015,0.0254,0.0254,0.0254,0.0254,0.0227],AW:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],AU:[0.1053,0.0147,0.0147,0.1053,0.0147,0.0147,0.0994,0.0136,0.0136,0.0136,0.0136,0.0121],AT:[0.074,0.0222,0.0222,0.074,0.0222,0.0222,0.0699,0.0205,0.0205,0.0205,0.0205,0.0183],AZ:[0.1075,0.0276,0.0276,0.1075,0.0276,0.0276,0.1015,0.0254,0.0254,0.0254,0.0254,0.0227],BS:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],BH:[0.049,0.0118,0.0118,0.049,0.0118,0.0118,0.0463,0.0109,0.0109,0.0109,0.0109,0.0097],BD:[0.0915,0.0048,0.0048,0.0915,0.0048,0.0048,0.0864,0.0044,0.0044,0.0044,0.0044,0.004],BB:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],BY:[0.1075,0.0276,0.0276,0.1075,0.0276,0.0276,0.1015,0.0254,0.0254,0.0254,0.0254,0.0227],BE:[0.074,0.0222,0.0222,0.074,0.0222,0.0222,0.0699,0.0205,0.0205,0.0205,0.0205,0.0183],BZ:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],BJ:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],BM:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],BT:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],BO:[0.0925,0.0147,0.0147,0.0925,0.0147,0.0147,0.0873,0.0136,0.0136,0.0136,0.0136,0.0121],BA:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],BW:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],BR:[0.0781,0.0088,0.0088,0.0781,0.0088,0.0088,0.0738,0.0082,0.0082,0.0082,0.0082,0.0073],IO:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],VG:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],BN:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],BG:[0.1075,0.0276,0.0276,0.1075,0.0276,0.0276,0.1015,0.0254,0.0254,0.0254,0.0254,0.0227],BF:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],BI:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],KH:[0.1053,0.0147,0.0147,0.1053,0.0147,0.0147,0.0994,0.0136,0.0136,0.0136,0.0136,0.0121],CM:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],CA:[0.0313,0.0044,0.0044,0.0313,0.0044,0.0044,0.0295,0.0041,0.0041,0.0041,0.0041,0.0036],CV:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],KY:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],CF:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],TD:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],CL:[0.1111,0.026,0.026,0.1111,0.026,0.026,0.1049,0.024,0.024,0.024,0.024,0.0214],CN:[0.1053,0.0147,0.0147,0.1053,0.0147,0.0147,0.0994,0.0136,0.0136,0.0136,0.0136,0.0121],CX:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],CC:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],CO:[0.0156,0.001,0.001,0.0156,0.001,0.001,0.0148,0.001,0.001,0.001,0.001,0.0009],KM:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],CK:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],CR:[0.0925,0.0147,0.0147,0.0925,0.0147,0.0147,0.0873,0.0136,0.0136,0.0136,0.0136,0.0121],HR:[0.1075,0.0276,0.0276,0.1075,0.0276,0.0276,0.1015,0.0254,0.0254,0.0254,0.0254,0.0227],CU:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],CW:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],CY:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],CZ:[0.1075,0.0276,0.0276,0.1075,0.0276,0.0276,0.1015,0.0254,0.0254,0.0254,0.0254,0.0227],CD:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],DK:[0.074,0.0222,0.0222,0.074,0.0222,0.0222,0.0699,0.0205,0.0205,0.0205,0.0205,0.0183],DJ:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],DM:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],DO:[0.0925,0.0147,0.0147,0.0925,0.0147,0.0147,0.0873,0.0136,0.0136,0.0136,0.0136,0.0121],TL:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],EC:[0.0925,0.0147,0.0147,0.0925,0.0147,0.0147,0.0873,0.0136,0.0136,0.0136,0.0136,0.0121],EG:[0.0805,0.0047,0.0047,0.0805,0.0047,0.0047,0.076,0.0043,0.0043,0.0043,0.0043,0.0039],SV:[0.0925,0.0147,0.0147,0.0925,0.0147,0.0147,0.0873,0.0136,0.0136,0.0136,0.0136,0.0121],GQ:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],ER:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],EE:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],ET:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],FK:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],FO:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],FJ:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],FI:[0.074,0.0222,0.0222,0.074,0.0222,0.0222,0.0699,0.0205,0.0205,0.0205,0.0205,0.0183],FR:[0.1074,0.039,0.039,0.1074,0.039,0.039,0.1014,0.036,0.036,0.036,0.036,0.0321],PF:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],GA:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],GM:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],GE:[0.1075,0.0276,0.0276,0.1075,0.0276,0.0276,0.1015,0.0254,0.0254,0.0254,0.0254,0.0227],DE:[0.1706,0.0715,0.0715,0.1706,0.0715,0.0715,0.1611,0.066,0.066,0.066,0.066,0.0589],GH:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],GI:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],GR:[0.1075,0.0276,0.0276,0.1075,0.0276,0.0276,0.1015,0.0254,0.0254,0.0254,0.0254,0.0227],GL:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],GD:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],GU:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],GT:[0.0925,0.0147,0.0147,0.0925,0.0147,0.0147,0.0873,0.0136,0.0136,0.0136,0.0136,0.0121],GG:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],GN:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],GW:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],GY:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],HT:[0.0925,0.0147,0.0147,0.0925,0.0147,0.0147,0.0873,0.0136,0.0136,0.0136,0.0136,0.0121],HN:[0.0925,0.0147,0.0147,0.0925,0.0147,0.0147,0.0873,0.0136,0.0136,0.0136,0.0136,0.0121],HK:[0.0915,0.0338,0.0338,0.0915,0.0338,0.0338,0.0864,0.0312,0.0312,0.0312,0.0312,0.0278],HU:[0.1075,0.0455,0.0455,0.1075,0.0455,0.0455,0.1015,0.042,0.042,0.042,0.042,0.0375],IS:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],IN:[0.0148,0.0018,0.0018,0.0148,0.0018,0.0018,0.0139,0.0017,0.0017,0.0017,0.0017,0.0015],ID:[0.0514,0.0325,0.0325,0.0514,0.0325,0.0325,0.0485,0.03,0.03,0.03,0.03,0.0268],IR:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],IQ:[0.0426,0.0103,0.0103,0.0426,0.0103,0.0103,0.0402,0.0095,0.0095,0.0095,0.0095,0.0085],IE:[0.074,0.0222,0.0222,0.074,0.0222,0.0222,0.0699,0.0205,0.0205,0.0205,0.0205,0.0183],IM:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],IL:[0.0441,0.0069,0.0069,0.0441,0.0069,0.0069,0.0417,0.0064,0.0064,0.0064,0.0064,0.0057],IT:[0.0994,0.039,0.039,0.0994,0.039,0.039,0.0938,0.036,0.036,0.036,0.036,0.0321],CI:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],JM:[0.0925,0.0147,0.0147,0.0925,0.0147,0.0147,0.0873,0.0136,0.0136,0.0136,0.0136,0.0121],JP:[0.1053,0.0147,0.0147,0.1053,0.0147,0.0147,0.0994,0.0136,0.0136,0.0136,0.0136,0.0121],JE:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],JO:[0.049,0.0118,0.0118,0.049,0.0118,0.0118,0.0463,0.0109,0.0109,0.0109,0.0109,0.0097],KZ:[0.0755,0.0234,0.0234,0.0755,0.0234,0.0234,0.0713,0.0216,0.0216,0.0216,0.0216,0.0193],KE:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],KI:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],XK:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],KW:[0.099,0.0572,0.0572,0.099,0.0572,0.0572,0.0935,0.0528,0.0528,0.0528,0.0528,0.0471],KG:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],LA:[0.1053,0.0147,0.0147,0.1053,0.0147,0.0147,0.0994,0.0136,0.0136,0.0136,0.0136,0.0121],LV:[0.1075,0.0276,0.0276,0.1075,0.0276,0.0276,0.1015,0.0254,0.0254,0.0254,0.0254,0.0227],LB:[0.049,0.0118,0.0118,0.049,0.0118,0.0118,0.0463,0.0109,0.0109,0.0109,0.0109,0.0097],LS:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],LR:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],LY:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],LI:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],LT:[0.1075,0.0276,0.0276,0.1075,0.0276,0.0276,0.1015,0.0254,0.0254,0.0254,0.0254,0.0227],LU:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],MO:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],MK:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],MG:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],MW:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],MY:[0.1075,0.0182,0.0182,0.1075,0.0182,0.0182,0.1015,0.0168,0.0168,0.0168,0.0168,0.015],MV:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],ML:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],MT:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],MH:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],MR:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],MU:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],YT:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],MX:[0.0496,0.0111,0.0111,0.0496,0.0111,0.0111,0.0468,0.0102,0.0102,0.0102,0.0102,0.0091],FM:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],MD:[0.1075,0.0276,0.0276,0.1075,0.0276,0.0276,0.1015,0.0254,0.0254,0.0254,0.0254,0.0227],MC:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],MN:[0.1053,0.0147,0.0147,0.1053,0.0147,0.0147,0.0994,0.0136,0.0136,0.0136,0.0136,0.0121],ME:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],MS:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],MA:[0.0518,0.0299,0.0299,0.0518,0.0299,0.0299,0.0489,0.0276,0.0276,0.0276,0.0276,0.0246],MZ:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],MM:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],NA:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],NR:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],NP:[0.0915,0.0044,0.0044,0.0915,0.0044,0.0044,0.0864,0.0041,0.0041,0.0041,0.0041,0.0036],NL:[0.1996,0.065,0.065,0.1996,0.065,0.065,0.1884,0.06,0.06,0.06,0.06,0.0535],AN:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],NC:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],NZ:[0.1053,0.0147,0.0147,0.1053,0.0147,0.0147,0.0994,0.0136,0.0136,0.0136,0.0136,0.0121],NI:[0.0925,0.0147,0.0147,0.0925,0.0147,0.0147,0.0873,0.0136,0.0136,0.0136,0.0136,0.0121],NE:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],NG:[0.0645,0.0087,0.0087,0.0645,0.0087,0.0087,0.0609,0.008,0.008,0.008,0.008,0.0072],NU:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],KP:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],MP:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],NO:[0.074,0.0222,0.0222,0.074,0.0222,0.0222,0.0699,0.0205,0.0205,0.0205,0.0205,0.0183],OM:[0.0426,0.0321,0.0321,0.0426,0.0321,0.0321,0.0402,0.0296,0.0296,0.0296,0.0296,0.0264],XX:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],PK:[0.0591,0.0195,0.0195,0.0591,0.0195,0.0195,0.0558,0.018,0.018,0.018,0.018,0.0161],PW:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],PS:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],PA:[0.0925,0.0147,0.0147,0.0925,0.0147,0.0147,0.0873,0.0136,0.0136,0.0136,0.0136,0.0121],PG:[0.1053,0.0147,0.0147,0.1053,0.0147,0.0147,0.0994,0.0136,0.0136,0.0136,0.0136,0.0121],PY:[0.0925,0.0147,0.0147,0.0925,0.0147,0.0147,0.0873,0.0136,0.0136,0.0136,0.0136,0.0121],PE:[0.0879,0.039,0.039,0.0879,0.039,0.039,0.083,0.036,0.036,0.036,0.036,0.0321],PH:[0.1053,0.0147,0.0147,0.1053,0.0147,0.0147,0.0994,0.0136,0.0136,0.0136,0.0136,0.0121],PN:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],PL:[0.0458,0.0159,0.0159,0.0458,0.0159,0.0159,0.0432,0.0146,0.0146,0.0146,0.0146,0.0131],PT:[0.074,0.0222,0.0222,0.074,0.0222,0.0222,0.0699,0.0205,0.0205,0.0205,0.0205,0.0183],PR:[0.0925,0.0147,0.0147,0.0925,0.0147,0.0147,0.0873,0.0136,0.0136,0.0136,0.0136,0.0121],QA:[0.0426,0.0156,0.0156,0.0426,0.0156,0.0156,0.0402,0.0144,0.0144,0.0144,0.0144,0.0128],CG:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],RE:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],RO:[0.1075,0.0377,0.0377,0.1075,0.0377,0.0377,0.1015,0.0348,0.0348,0.0348,0.0348,0.031],RU:[0.1003,0.052,0.052,0.1003,0.052,0.052,0.0946,0.048,0.048,0.048,0.048,0.0428],RW:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],BL:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],SH:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],KN:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],LC:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],MF:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],PM:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],VC:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],WS:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],SM:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],ST:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],SA:[0.072,0.0139,0.0139,0.072,0.0139,0.0139,0.068,0.0128,0.0128,0.0128,0.0128,0.0114],SN:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],RS:[0.1075,0.0276,0.0276,0.1075,0.0276,0.0276,0.1015,0.0254,0.0254,0.0254,0.0254,0.0227],SC:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],SL:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],SG:[0.0915,0.0208,0.0208,0.0915,0.0208,0.0208,0.0864,0.0192,0.0192,0.0192,0.0192,0.0171],SX:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],SK:[0.1075,0.0276,0.0276,0.1075,0.0276,0.0276,0.1015,0.0254,0.0254,0.0254,0.0254,0.0227],SI:[0.1075,0.0276,0.0276,0.1075,0.0276,0.0276,0.1015,0.0254,0.0254,0.0254,0.0254,0.0227],SB:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],SO:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],ZA:[0.0474,0.0124,0.0124,0.0474,0.0124,0.0124,0.0447,0.0114,0.0114,0.0114,0.0114,0.0102],KR:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],SS:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],ES:[0.0884,0.026,0.026,0.0884,0.026,0.026,0.0834,0.024,0.024,0.024,0.024,0.0214],LK:[0.0915,0.0026,0.0026,0.0915,0.0026,0.0026,0.0864,0.0024,0.0024,0.0024,0.0024,0.0021],SD:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],SR:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],SJ:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],SZ:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],SE:[0.074,0.0222,0.0222,0.074,0.0222,0.0222,0.0699,0.0205,0.0205,0.0205,0.0205,0.0183],CH:[0.074,0.0222,0.0222,0.074,0.0222,0.0222,0.0699,0.0205,0.0205,0.0205,0.0205,0.0183],SY:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],TW:[0.1053,0.0147,0.0147,0.1053,0.0147,0.0147,0.0994,0.0136,0.0136,0.0136,0.0136,0.0121],TJ:[0.1053,0.0147,0.0147,0.1053,0.0147,0.0147,0.0994,0.0136,0.0136,0.0136,0.0136,0.0121],TZ:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],TH:[0.1053,0.0147,0.0147,0.1053,0.0147,0.0147,0.0994,0.0136,0.0136,0.0136,0.0136,0.0121],TG:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],TK:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],TO:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],TT:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],TN:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],TR:[0.0136,0.0012,0.0012,0.0136,0.0012,0.0012,0.0129,0.0011,0.0011,0.0011,0.0011,0.001],TM:[0.1053,0.0147,0.0147,0.1053,0.0147,0.0147,0.0994,0.0136,0.0136,0.0136,0.0136,0.0121],TC:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],TV:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],VI:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],UG:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],UA:[0.1075,0.0387,0.0387,0.1075,0.0387,0.0387,0.1015,0.0358,0.0358,0.0358,0.0358,0.0319],AE:[0.072,0.0204,0.0204,0.072,0.0204,0.0204,0.068,0.0188,0.0188,0.0188,0.0188,0.0168],GB:[0.0794,0.0286,0.0286,0.0794,0.0286,0.0286,0.0749,0.0264,0.0264,0.0264,0.0264,0.0235],US:[0.0313,0.0044,0.0044,0.0313,0.0044,0.0044,0.0295,0.0041,0.0041,0.0041,0.0041,0.0036],UY:[0.0925,0.0147,0.0147,0.0925,0.0147,0.0147,0.0873,0.0136,0.0136,0.0136,0.0136,0.0121],UZ:[0.1053,0.0147,0.0147,0.1053,0.0147,0.0147,0.0994,0.0136,0.0136,0.0136,0.0136,0.0121],VU:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],VA:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],VE:[0.0925,0.0147,0.0147,0.0925,0.0147,0.0147,0.0873,0.0136,0.0136,0.0136,0.0136,0.0121],VN:[0.1053,0.0147,0.0147,0.1053,0.0147,0.0147,0.0994,0.0136,0.0136,0.0136,0.0136,0.0121],WF:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],EH:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082],YE:[0.049,0.0118,0.0118,0.049,0.0118,0.0118,0.0463,0.0109,0.0109,0.0109,0.0109,0.0097],ZM:[0.0281,0.0052,0.0052,0.0281,0.0052,0.0052,0.0266,0.0048,0.0048,0.0048,0.0048,0.0043],ZW:[0.0755,0.01,0.01,0.0755,0.01,0.01,0.0713,0.0092,0.0092,0.0092,0.0092,0.0082]};
   var NAMES = {AF:"Afghanistan",AL:"Albania",DZ:"Algeria",AS:"American Samoa",AD:"Andorra",AO:"Angola",AI:"Anguilla",AQ:"Antarctica",AG:"Antigua and Barbuda",AR:"Argentina",AM:"Armenia",AW:"Aruba",AU:"Australia",AT:"Austria",AZ:"Azerbaijan",BS:"Bahamas",BH:"Bahrain",BD:"Bangladesh",BB:"Barbados",BY:"Belarus",BE:"Belgium",BZ:"Belize",BJ:"Benin",BM:"Bermuda",BT:"Bhutan",BO:"Bolivia",BA:"Bosnia and Herzegovina",BW:"Botswana",BR:"Brazil",IO:"British Indian Ocean Territory",VG:"British Virgin Islands",BN:"Brunei",BG:"Bulgaria",BF:"Burkina Faso",BI:"Burundi",KH:"Cambodia",CM:"Cameroon",CA:"Canada",CV:"Cape Verde",KY:"Cayman Islands",CF:"Central African Republic",TD:"Chad",CL:"Chile",CN:"China",CX:"Christmas Island",CC:"Cocos Islands",CO:"Colombia",KM:"Comoros",CK:"Cook Islands",CR:"Costa Rica",HR:"Croatia",CU:"Cuba",CW:"Curacao",CY:"Cyprus",CZ:"Czech Republic",CD:"Democratic Republic of the Congo",DK:"Denmark",DJ:"Djibouti",DM:"Dominica",DO:"Dominican Republic",TL:"East Timor",EC:"Ecuador",EG:"Egypt",SV:"El Salvador",GQ:"Equatorial Guinea",ER:"Eritrea",EE:"Estonia",ET:"Ethiopia",FK:"Falkland Islands",FO:"Faroe Islands",FJ:"Fiji",FI:"Finland",FR:"France",PF:"French Polynesia",GA:"Gabon",GM:"Gambia",GE:"Georgia",DE:"Germany",GH:"Ghana",GI:"Gibraltar",GR:"Greece",GL:"Greenland",GD:"Grenada",GU:"Guam",GT:"Guatemala",GG:"Guernsey",GN:"Guinea",GW:"Guinea-Bissau",GY:"Guyana",HT:"Haiti",HN:"Honduras",HK:"Hong Kong",HU:"Hungary",IS:"Iceland",IN:"India",ID:"Indonesia",IR:"Iran",IQ:"Iraq",IE:"Ireland",IM:"Isle of Man",IL:"Israel",IT:"Italy",CI:"Ivory Coast",JM:"Jamaica",JP:"Japan",JE:"Jersey",JO:"Jordan",KZ:"Kazakhstan",KE:"Kenya",KI:"Kiribati",XK:"Kosovo",KW:"Kuwait",KG:"Kyrgyzstan",LA:"Laos",LV:"Latvia",LB:"Lebanon",LS:"Lesotho",LR:"Liberia",LY:"Libya",LI:"Liechtenstein",LT:"Lithuania",LU:"Luxembourg",MO:"Macau",MK:"Macedonia",MG:"Madagascar",MW:"Malawi",MY:"Malaysia",MV:"Maldives",ML:"Mali",MT:"Malta",MH:"Marshall Islands",MR:"Mauritania",MU:"Mauritius",YT:"Mayotte",MX:"Mexico",FM:"Micronesia",MD:"Moldova",MC:"Monaco",MN:"Mongolia",ME:"Montenegro",MS:"Montserrat",MA:"Morocco",MZ:"Mozambique",MM:"Myanmar",NA:"Namibia",NR:"Nauru",NP:"Nepal",NL:"Netherlands",AN:"Netherlands Antilles",NC:"New Caledonia",NZ:"New Zealand",NI:"Nicaragua",NE:"Niger",NG:"Nigeria",NU:"Niue",KP:"North Korea",MP:"Northern Mariana Islands",NO:"Norway",OM:"Oman",XX:"Other",PK:"Pakistan",PW:"Palau",PS:"Palestine",PA:"Panama",PG:"Papua New Guinea",PY:"Paraguay",PE:"Peru",PH:"Philippines",PN:"Pitcairn",PL:"Poland",PT:"Portugal",PR:"Puerto Rico",QA:"Qatar",CG:"Republic of the Congo",RE:"Reunion",RO:"Romania",RU:"Russia",RW:"Rwanda",BL:"Saint Barthelemy",SH:"Saint Helena",KN:"Saint Kitts and Nevis",LC:"Saint Lucia",MF:"Saint Martin",PM:"Saint Pierre and Miquelon",VC:"Saint Vincent and the Grenadines",WS:"Samoa",SM:"San Marino",ST:"Sao Tome and Principe",SA:"Saudi Arabia",SN:"Senegal",RS:"Serbia",SC:"Seychelles",SL:"Sierra Leone",SG:"Singapore",SX:"Sint Maarten",SK:"Slovakia",SI:"Slovenia",SB:"Solomon Islands",SO:"Somalia",ZA:"South Africa",KR:"South Korea",SS:"South Sudan",ES:"Spain",LK:"Sri Lanka",SD:"Sudan",SR:"Suriname",SJ:"Svalbard and Jan Mayen",SZ:"Swaziland",SE:"Sweden",CH:"Switzerland",SY:"Syria",TW:"Taiwan",TJ:"Tajikistan",TZ:"Tanzania",TH:"Thailand",TG:"Togo",TK:"Tokelau",TO:"Tonga",TT:"Trinidad and Tobago",TN:"Tunisia",TR:"Turkey",TM:"Turkmenistan",TC:"Turks and Caicos Islands",TV:"Tuvalu",VI:"U.S. Virgin Islands",UG:"Uganda",UA:"Ukraine",AE:"United Arab Emirates",GB:"United Kingdom",US:"United States",UY:"Uruguay",UZ:"Uzbekistan",VU:"Vanuatu",VA:"Vatican",VE:"Venezuela",VN:"Vietnam",WF:"Wallis and Futuna",EH:"Western Sahara",YE:"Yemen",ZM:"Zambia",ZW:"Zimbabwe"};
 
-  var PLAN_ORDER = ["growth","pro","business"];
+  var ALL_PLANS = ["growth","pro","business"];
+  // Some regions do not sell every tier — mainland China starts at Pro.
+  var PLAN_ORDER = ALL_PLANS.filter(function(k){
+    return (CONFIG.hidePlans || []).indexOf(k) === -1 && CONFIG.plans[k];
+  });
   var CATS = ["marketing","utility","authentication"];
   var CAT_META = {
     marketing:      { key:"rMarketing", label:"Marketing messages",      color:"var(--blue)",  i:0 },
@@ -601,10 +717,10 @@
      English is always the fallback and is captured from the markup at load,
      so a missing key simply shows the English.
      ------------------------------------------------------------------ */
-  var LANGS = {"id": {"t001": "Hitung berapa biaya WhatsApp yang sebenarnya setiap bulan.", "t002": "Di mana pelanggan Anda berada?", "t003": "Untuk apa Anda memakai WhatsApp?", "t004": "Ini menetapkan angka awal yang wajar dan menunjukkan fitur apa yang Anda butuhkan. Semuanya tetap bisa diubah setelahnya.", "t005": "Promosi dan kampanye", "t006": "Dukungan pelanggan", "t007": "Info pesanan dan pengiriman", "t008": "Login dan OTP", "t009": "Campuran semuanya", "t010": "Berapa nomor WhatsApp?", "t011": "Satu nomor cukup untuk sebagian besar bisnis. Nomor terpisah untuk, misalnya, penjualan dan dukungan memerlukan paket Business, dan setiap nomor tambahan ditagih bulanan.", "t012": "Nomor yang terhubung ke Wati", "t013": "Berapa orang yang butuh akses?", "t014": "Semua orang yang membalas chat dari kotak masuk bersama memerlukan satu lisensi pengguna: dukungan, penjualan, operasional. Di sinilah paket-paket berhenti saling menggantikan: Growth mencakup 3 pengguna dan tidak bisa ditambah dengan harga berapa pun.", "t015": "Anggota tim dengan akses Wati", "t016": "Berapa pesan per bulan?", "t017": "WhatsApp menagih per pesan terkirim berdasarkan kategori, bukan per kontak. Bagi volume bulanan Anda ke tiga kategori yang berbiaya. Menjangkau 15.000 orang dengan promo dan 10.000 dengan info pesanan berarti 15.000 marketing dan 10.000 utility.", "t018": "Marketing", "t019": "Penawaran, peluncuran, pengaktifan kembali, keranjang terbengkalai: semua yang bersifat promosi. Kategori termahal, jauh di atas yang lain.", "t020": "Utility", "t021": "Pesanan dikonfirmasi, dikirim, sedang diantar, pembayaran diterima, pengingat janji temu: semua yang terkait transaksi yang sudah dilakukan pelanggan.", "t022": "Autentikasi", "t023": "Hanya kata sandi sekali pakai dan kode login.", "t024": "Pesan layanan per bulan", "t025": "Balasan bebas yang Anda kirim dalam jendela 24 jam: agen manusia, langkah chatbot, Astra atau alat AI apa pun. Ditagih per pesan mulai 1 Oktober 2026, setelah 1.000 pertama per bulan. Pesan masuk dari pelanggan tidak pernah ditagih.", "t026": "Apa yang berubah", "t027": "Yang tetap tidak ditagih", "t028": "Apa pun yang dikirim pelanggan kepada Anda gratis.", "t029": ", per akun WhatsApp Business, disetel ulang tiap bulan.", "t030": "Gratis saat ini, dan Meta akan memperpanjang jendelanya menjadi 7 hari; tanggalnya belum dipastikan.", "t031": "pesan layanan ditagih per pesan, dan template utility yang dikirim dalam jendela 24 jam kembali ditagih. Keduanya sebelumnya gratis.", "t032": "Seberapa banyak yang berjalan otomatis?", "t033": "Satu pemicu otomatisasi dihitung setiap kali otomatisasi yang Anda siapkan berjalan untuk seorang pelanggan: chatbot, aksi kata kunci, aksi bawaan, materi balasan, aturan perutean, sekuens atau WhatsApp Flow. Jika habis di tengah bulan, otomatisasi berhenti sampai Anda membeli lagi, sehingga tim Anda membalas manual. Pemicu tambahan dihargai per tingkat sesuai kartu tarif wilayah ini, jadi makin banyak dibeli, makin murah biaya per pemicunya.", "t034": "Cara pemicu dihitung dan ditagih", "t035": "Pemicu otomatisasi per bulan", "t036": "Panduan kasar: satu per pelanggan yang memulai chat otomatis, ditambah satu untuk setiap tindak lanjut otomatis. Tindakan manual dan yang dipicu API tidak dihitung.", "t037": "Saya perlu chatbot lanjutan, formulir, pelacakan klik CTWA atau agen AI", "t038": "Growth hanya menangani aturan tingkat kata kunci. Mencentang ini membuatnya gugur.", "t039": "Kredit Wati AI per bulan", "t040": "Satu saldo bersama untuk Wati AI dan Astra: balasan AI, ringkasan, terjemahan, penilaian CX dan agen Astra semuanya memakainya. Termasuk gratis: 2.000 di Growth, 5.000 di Pro, 20.000 di Business. Biarkan 0 jika tim Anda tidak memakai AI.", "t041": "Astra sudah termasuk, dan kredit kini satu saldo", "t042": "— 1 di Growth, 2 di Pro, tanpa batas di Business. Agen AI suara hanya di Business. Tidak ada langganan Astra terpisah yang perlu dibeli.", "t043": "“Kredit Wati AI” adalah nama bersama untuk kredit Wati AI dan Astra: saldo yang sama menanggung keduanya. Kredit AI Co-pilot yang lama telah dihentikan.", "t044": "Kredit hangus pada tanggal penagihan setiap bulan dan kembali ke jumlah yang termasuk dalam paket. Isi ulang yang dibeli di tengah bulan juga tidak terbawa.", "t045": "Paket 1.000 kredit tidak lagi dijual dan harga per kredit turun setengah: uang yang sama kini membeli dua kali lipat kredit.", "t046": "Cara kerja paket bundel dan kredit AI, termasuk soal sisa kredit", "t047": "Perkiraan biaya bulanan", "t048": "Wati Pro", "t049": "Paling cocok", "t050": "Growth", "t051": "Pro", "t052": "Business", "t053": "Total per bulan", "t054": "Rata-rata per pesan", "t055": "Tahunan", "t056": "Simpan sebagai PDF", "t057": "Salin perkiraan", "t058": "Kebutuhan yang sama, dihargai di ketiga paket", "t059": "Paket yang lebih murah tidak selalu berarti tagihan lebih murah setelah pengguna, isi ulang pemicu dan tarif pesan tiap paket diperhitungkan.", "t060": "Harga paket, harga pengguna tambahan dan harga add-on adalah angka resmi yang dipublikasikan. Tarif per pesan berasal dari kartu tarif penggunaan Wati yang berlaku untuk wilayah ini, berlaku sejak 1 Oktober 2026, dan ditagih berdasarkan negara penerima. Setiap tingkat paket punya tarifnya sendiri: tingkat yang lebih tinggi lebih murah per pesan.", "t061": "Kartu tarif yang menjadi dasar kalkulator ini ditautkan di pertanyaan 1, sehingga Anda bisa membuka dokumen sumbernya saat sedang menelepon, bukan mengutip dari ingatan.", "t062": "Perkiraan ini memilih paket termurah yang memenuhi kebutuhan Anda, tetapi Anda bisa mengunci paket tertentu di rincian untuk menawarkan tingkat yang lebih tinggi. Jika paket yang dikunci tidak dapat memenuhi kebutuhan yang dimasukkan, biaya yang tidak tertanggung dikeluarkan dari total dan ditandai di atasnya.", "t063": "Batas 15.000 siaran per bulan pada Growth dibandingkan dengan volume marketing ditambah utility. Pesan autentikasi dipicu API satu per satu dan tidak dihitung sebagai siaran. Pro dan Business tidak punya batas siaran.", "t064": "Pemicu otomatisasi yang termasuk: 1.000 di Growth, 2.000 di Pro, 5.000 di Business. Pemicu tambahan dihargai per tingkat sesuai kartu tarif wilayah ini: Anda membayar tingkat pertama yang menutupi kebutuhan Anda.", "t065": "Kredit Wati AI yang termasuk: 2.000 di Growth, 5.000 di Pro, 20.000 di Business, sebagai satu saldo bersama antara Wati AI dan Astra. Kredit tambahan dihargai per tingkat sesuai kartu tarif wilayah ini, dan tidak terbawa ke bulan berikutnya.", "t066": "Agen AI Astra sudah termasuk dalam paket: 1 di Growth, 2 di Pro, tanpa batas di Business, dengan AI suara hanya di Business. Semuanya bukan langganan terpisah dan tidak dihitung di sini.", "t067": "Nomor WhatsApp tambahan memerlukan paket Business. Shopify ditagih dalam USD sebesar $4,99 per bulan di mana pun, jadi nilainya mengikuti kurs dalam mata uang lain.", "t068": "Biaya pesan diambil dari dompet prabayar, terpisah dari tagihan langganan.", "t069": "Diskon volume Business di atas sekitar satu juta pesan per bulan tidak dimodelkan. Juga tidak termasuk: agen AI Astra, onboarding khusus, pengelolaan akun teknis, layanan profesional, verifikasi centang hijau dan add-on throughput tinggi Blitz, semuanya ditawarkan terpisah.", "t070": "Perkiraan bulanan", "lede": "Jawab sembilan pertanyaan singkat. Tagihan Anda terinci sendiri sambil jalan: biaya paket, pengguna, add-on dan setiap kategori pesan pada tarif sebenarnya. Lalu pilih mata uang penawaran dan unduh sebagai PDF.", "q7h": "AI, Astra dan kredit", "q7n": "Astra kini hadir di semua paket. Kredit adalah satu saldo bersama dengan jatah yang sudah termasuk, dan kelebihannya dihargai per tingkat.", "agentsAi": "Agen AI Astra yang Anda butuhkan", "agentsAiHint": "Growth mencakup 1, Pro mencakup 2, Business tanpa batas. Meminta lebih dari yang diizinkan paket akan membuatnya gugur.", "voice": "Saya perlu agen AI suara", "voiceHint": "AI suara hanya di Business: mencentang ini menggugurkan Growth dan Pro.", "q8h": "Add-on", "q8n": "Setiap harga di sini diambil langsung dari kartu tarif wilayah ini. Add-on per pengguna dijual dalam paket lima: masukkan berapa operator yang membutuhkannya dan penawaran dibulatkan ke paket penuh, jadi delapan operator ditagih sebagai sepuluh. Setiap add-on tertaut ke artikel dukungan yang menjelaskannya.", "shopify": "Hubungkan Shopify", "shopifyHint": "Diperlukan untuk pemulihan keranjang terbengkalai, konfirmasi COD dan info pesanan otomatis. Ditagih dalam USD sebesar $4,99 per bulan.", "q9h": "Tampilkan penawaran dalam", "grpUser": "Per pengguna, dijual dalam paket lima", "grpMonth": "Bulanan, biaya tetap", "ao_opscope": "Cakupan operator", "ao_opscope_h": "Setiap operator hanya melihat percakapan yang ditugaskan kepadanya, bukan seluruh kotak masuk bersama. Dipakai bila antartim atau antarwilayah tidak boleh saling melihat percakapan.", "ao_opprivacy": "Privasi operator", "ao_opprivacy_h": "Menyembunyikan detail kontak pelanggan dari operator saat mereka mengobrol. Umum dipakai bila nomor itu sendiri adalah aset sensitif.", "ao_masking": "Penyamaran nomor telepon", "ao_masking_h": "Menyamarkan nomor telepon pelanggan di kotak masuk sehingga agen bisa membalas tanpa melihatnya. Biasanya dibeli demi kepatuhan atau mencegah agen membawa bisnis ke luar platform.", "ao_roundrobin": "Penugasan chat bergilir", "ao_roundrobin_h": "Membagi chat masuk secara merata ke agen yang tersedia alih-alih membiarkannya tanpa penugasan. Menjaga waktu respons tetap merata sepanjang shift.", "ao_blitz": "Blitz: 200 pesan per detik", "ao_blitz_h": "Menaikkan kecepatan kirim siaran menjadi 200 pesan per detik. Penting untuk pengiriman yang mendesak seperti flash sale dan peringatan mendadak.", "ao_apilimit": "Kenaikan batas API bulanan", "ao_apilimit_h": "Menaikkan batas API bulanan menjadi 40 juta panggilan. Untuk integrasi bervolume tinggi yang jika tidak akan menabrak batas paket.", "ao_apihigh": "API volume tinggi", "ao_apihigh_h": "Menaikkan batas lonjakan menjadi 200 panggilan API setiap 10 detik. Untuk sistem yang mengirim banyak permintaan sekaligus, bukan banyak sepanjang bulan.", "ao_ctwa": "Iklan Click-to-WhatsApp", "ao_ctwa_h": "Melacak klik dari iklan Facebook dan Instagram ke WhatsApp dan mengatribusikan percakapan yang dihasilkan, termasuk dasbor analitik dan Google Ads.", "ao_forms": "Formulir", "ao_forms_h": "Hingga 25 formulir WhatsApp, sehingga pelanggan mengisi kolom terstruktur di dalam chat. Dipakai untuk pemesanan, pendaftaran dan kualifikasi prospek.", "perUser": "per pengguna", "perMonth": "per bulan", "langLabel": "Bahasa", "rMarketing": "Pesan marketing", "rUtility": "Pesan utility", "rAuth": "Pesan autentikasi", "rPlan": "paket", "rUsers": "pengguna", "rTriggers": "pemicu", "rCredits": "kredit Wati AI", "rExtraUsers": "pengguna tambahan", "rExtraNumbers": "nomor WhatsApp tambahan", "rExtraTriggers": "Pemicu otomatisasi tambahan", "rExtraCredits": "Kredit Wati AI tambahan", "rShopify": "Integrasi Shopify", "rSvcFree": "Pesan layanan, jatah gratis", "rService": "Pesan layanan", "rSubHead": "Langganan — ditagih pada siklus paket Anda", "rSubTotal": "Subtotal langganan", "rMsgHead": "Pesan — dari dompet prabayar Anda", "rMsgTotal": "Subtotal dompet", "aoFree": "sudah termasuk di paket ini", "aoBilled": "ditagih dalam paket 5", "aoLearn": "Apa fungsinya"}};
+  var LANGS = {"id": {"t001": "Hitung berapa biaya WhatsApp yang sebenarnya setiap bulan.", "t002": "Di mana pelanggan Anda berada?", "t003": "Untuk apa Anda memakai WhatsApp?", "t004": "Ini menetapkan angka awal yang wajar dan menunjukkan fitur apa yang Anda butuhkan. Semuanya tetap bisa diubah setelahnya.", "t005": "Promosi dan kampanye", "t006": "Dukungan pelanggan", "t007": "Info pesanan dan pengiriman", "t008": "Login dan OTP", "t009": "Campuran semuanya", "t010": "Berapa nomor WhatsApp?", "t011": "Satu nomor cukup untuk sebagian besar bisnis. Nomor terpisah untuk, misalnya, penjualan dan dukungan memerlukan paket Business, dan setiap nomor tambahan ditagih bulanan.", "t012": "Nomor yang terhubung ke Wati", "t013": "Berapa orang yang butuh akses?", "t014": "Semua orang yang membalas chat dari kotak masuk bersama memerlukan satu lisensi pengguna: dukungan, penjualan, operasional. Di sinilah paket-paket berhenti saling menggantikan: Growth mencakup 3 pengguna dan tidak bisa ditambah dengan harga berapa pun.", "t015": "Anggota tim dengan akses Wati", "t016": "Berapa pesan per bulan?", "t017": "WhatsApp menagih per pesan terkirim berdasarkan kategori, bukan per kontak. Bagi volume bulanan Anda ke tiga kategori yang berbiaya. Menjangkau 15.000 orang dengan promo dan 10.000 dengan info pesanan berarti 15.000 marketing dan 10.000 utility.", "t018": "Marketing", "t019": "Penawaran, peluncuran, pengaktifan kembali, keranjang terbengkalai: semua yang bersifat promosi. Kategori termahal, jauh di atas yang lain.", "t020": "Utility", "t021": "Pesanan dikonfirmasi, dikirim, sedang diantar, pembayaran diterima, pengingat janji temu: semua yang terkait transaksi yang sudah dilakukan pelanggan.", "t022": "Autentikasi", "t023": "Hanya kata sandi sekali pakai dan kode login.", "t024": "Pesan layanan per bulan", "t025": "Balasan bebas yang Anda kirim dalam jendela 24 jam: agen manusia, langkah chatbot, Astra atau alat AI apa pun. Ditagih per pesan mulai 1 Oktober 2026, setelah 1.000 pertama per bulan. Pesan masuk dari pelanggan tidak pernah ditagih.", "t026": "Apa yang berubah", "t027": "Yang tetap tidak ditagih", "t028": "Apa pun yang dikirim pelanggan kepada Anda gratis.", "t029": ", per akun WhatsApp Business, disetel ulang tiap bulan.", "t030": "Gratis saat ini, dan Meta akan memperpanjang jendelanya menjadi 7 hari; tanggalnya belum dipastikan.", "t031": "pesan layanan ditagih per pesan, dan template utility yang dikirim dalam jendela 24 jam kembali ditagih. Keduanya sebelumnya gratis.", "t032": "Seberapa banyak yang berjalan otomatis?", "t033": "Satu pemicu otomatisasi dihitung setiap kali otomatisasi yang Anda siapkan berjalan untuk seorang pelanggan: chatbot, aksi kata kunci, aksi bawaan, materi balasan, aturan perutean, sekuens atau WhatsApp Flow. Jika habis di tengah bulan, otomatisasi berhenti sampai Anda membeli lagi, sehingga tim Anda membalas manual. Pemicu tambahan dihargai per tingkat sesuai kartu tarif wilayah ini, jadi makin banyak dibeli, makin murah biaya per pemicunya.", "t034": "Cara pemicu dihitung dan ditagih", "t035": "Pemicu otomatisasi per bulan", "t036": "Panduan kasar: satu per pelanggan yang memulai chat otomatis, ditambah satu untuk setiap tindak lanjut otomatis. Tindakan manual dan yang dipicu API tidak dihitung.", "t037": "Saya perlu chatbot lanjutan, formulir, pelacakan klik CTWA atau agen AI", "t038": "Growth hanya menangani aturan tingkat kata kunci. Mencentang ini membuatnya gugur.", "t039": "Kredit Wati AI per bulan", "t040": "Satu saldo bersama untuk Wati AI dan Astra: balasan AI, ringkasan, terjemahan, penilaian CX dan agen Astra semuanya memakainya. Termasuk gratis: 2.000 di Growth, 5.000 di Pro, 20.000 di Business. Biarkan 0 jika tim Anda tidak memakai AI.", "t041": "Astra sudah termasuk, dan kredit kini satu saldo", "t042": "— 1 di Growth, 2 di Pro, tanpa batas di Business. Agen AI suara hanya di Business. Tidak ada langganan Astra terpisah yang perlu dibeli.", "t043": "“Kredit Wati AI” adalah nama bersama untuk kredit Wati AI dan Astra: saldo yang sama menanggung keduanya. Kredit AI Co-pilot yang lama telah dihentikan.", "t044": "Kredit hangus pada tanggal penagihan setiap bulan dan kembali ke jumlah yang termasuk dalam paket. Isi ulang yang dibeli di tengah bulan juga tidak terbawa.", "t045": "Paket 1.000 kredit tidak lagi dijual dan harga per kredit turun setengah: uang yang sama kini membeli dua kali lipat kredit.", "t046": "Cara kerja paket bundel dan kredit AI, termasuk soal sisa kredit", "t047": "Perkiraan biaya bulanan", "t048": "Wati Pro", "t049": "Paling cocok", "t050": "Growth", "t051": "Pro", "t052": "Business", "t053": "Total per bulan", "t054": "Rata-rata per pesan", "t055": "Tahunan", "t056": "Simpan sebagai PDF", "t057": "Salin perkiraan", "t058": "Kebutuhan yang sama, dihargai di ketiga paket", "t059": "Paket yang lebih murah tidak selalu berarti tagihan lebih murah setelah pengguna, isi ulang pemicu dan tarif pesan tiap paket diperhitungkan.", "t060": "Harga paket, harga pengguna tambahan dan harga add-on adalah angka resmi yang dipublikasikan. Tarif per pesan berasal dari kartu tarif penggunaan Wati yang berlaku untuk wilayah ini, berlaku sejak 1 Oktober 2026, dan ditagih berdasarkan negara penerima. Setiap tingkat paket punya tarifnya sendiri: tingkat yang lebih tinggi lebih murah per pesan.", "t061": "Kartu tarif yang menjadi dasar kalkulator ini ditautkan di pertanyaan 1, sehingga Anda bisa membuka dokumen sumbernya saat sedang menelepon, bukan mengutip dari ingatan.", "t062": "Perkiraan ini memilih paket termurah yang memenuhi kebutuhan Anda, tetapi Anda bisa mengunci paket tertentu di rincian untuk menawarkan tingkat yang lebih tinggi. Jika paket yang dikunci tidak dapat memenuhi kebutuhan yang dimasukkan, biaya yang tidak tertanggung dikeluarkan dari total dan ditandai di atasnya.", "t063": "Batas 15.000 siaran per bulan pada Growth dibandingkan dengan volume marketing ditambah utility. Pesan autentikasi dipicu API satu per satu dan tidak dihitung sebagai siaran. Pro dan Business tidak punya batas siaran.", "t064": "Pemicu otomatisasi yang termasuk: 1.000 di Growth, 2.000 di Pro, 5.000 di Business. Pemicu tambahan dihargai per tingkat sesuai kartu tarif wilayah ini: Anda membayar tingkat pertama yang menutupi kebutuhan Anda.", "t065": "Kredit Wati AI yang termasuk: 2.000 di Growth, 5.000 di Pro, 20.000 di Business, sebagai satu saldo bersama antara Wati AI dan Astra. Kredit tambahan dihargai per tingkat sesuai kartu tarif wilayah ini, dan tidak terbawa ke bulan berikutnya.", "t066": "Agen AI Astra sudah termasuk dalam paket: 1 di Growth, 2 di Pro, tanpa batas di Business, dengan AI suara hanya di Business. Semuanya bukan langganan terpisah dan tidak dihitung di sini.", "t067": "Nomor WhatsApp tambahan memerlukan paket Business. Shopify ditagih dalam USD sebesar $4,99 per bulan di mana pun, jadi nilainya mengikuti kurs dalam mata uang lain.", "t068": "Biaya pesan diambil dari dompet prabayar, terpisah dari tagihan langganan.", "t069": "Diskon volume Business di atas sekitar satu juta pesan per bulan tidak dimodelkan. Juga tidak termasuk: agen AI Astra, onboarding khusus, pengelolaan akun teknis, layanan profesional, verifikasi centang hijau dan add-on throughput tinggi Blitz, semuanya ditawarkan terpisah.", "t070": "Perkiraan bulanan", "lede": "Jawab sembilan pertanyaan singkat. Tagihan Anda terinci sendiri sambil jalan: biaya paket, pengguna, add-on dan setiap kategori pesan pada tarif sebenarnya. Lalu pilih mata uang penawaran dan unduh sebagai PDF.", "q7h": "AI, Astra dan kredit", "q7n": "Astra kini hadir di semua paket. Kredit adalah satu saldo bersama dengan jatah yang sudah termasuk, dan kelebihannya dihargai per tingkat.", "agentsAi": "Agen AI Astra yang Anda butuhkan", "agentsAiHint": "Growth mencakup 1, Pro mencakup 2, Business tanpa batas. Meminta lebih dari yang diizinkan paket akan membuatnya gugur.", "voice": "Saya perlu agen AI suara", "voiceHint": "AI suara hanya di Business: mencentang ini menggugurkan Growth dan Pro.", "q8h": "Add-on", "q8n": "Setiap harga di sini diambil langsung dari kartu tarif wilayah ini. Add-on per pengguna dijual dalam paket lima: masukkan berapa operator yang membutuhkannya dan penawaran dibulatkan ke paket penuh, jadi delapan operator ditagih sebagai sepuluh. Setiap add-on tertaut ke artikel dukungan yang menjelaskannya.", "shopify": "Hubungkan Shopify", "shopifyHint": "Diperlukan untuk pemulihan keranjang terbengkalai, konfirmasi COD dan info pesanan otomatis. Ditagih dalam USD sebesar $4,99 per bulan.", "grpUser": "Per pengguna, dijual dalam paket lima", "grpMonth": "Bulanan, biaya tetap", "ao_opscope": "Cakupan operator", "ao_opscope_h": "Setiap operator hanya melihat percakapan yang ditugaskan kepadanya, bukan seluruh kotak masuk bersama. Dipakai bila antartim atau antarwilayah tidak boleh saling melihat percakapan.", "ao_opprivacy": "Privasi operator", "ao_opprivacy_h": "Menyembunyikan detail kontak pelanggan dari operator saat mereka mengobrol. Umum dipakai bila nomor itu sendiri adalah aset sensitif.", "ao_masking": "Penyamaran nomor telepon", "ao_masking_h": "Menyamarkan nomor telepon pelanggan di kotak masuk sehingga agen bisa membalas tanpa melihatnya. Biasanya dibeli demi kepatuhan atau mencegah agen membawa bisnis ke luar platform.", "ao_roundrobin": "Penugasan chat bergilir", "ao_roundrobin_h": "Membagi chat masuk secara merata ke agen yang tersedia alih-alih membiarkannya tanpa penugasan. Menjaga waktu respons tetap merata sepanjang shift.", "ao_blitz": "Blitz: 200 pesan per detik", "ao_blitz_h": "Menaikkan kecepatan kirim siaran menjadi 200 pesan per detik. Penting untuk pengiriman yang mendesak seperti flash sale dan peringatan mendadak.", "ao_apilimit": "Kenaikan batas API bulanan", "ao_apilimit_h": "Menaikkan batas API bulanan menjadi 40 juta panggilan. Untuk integrasi bervolume tinggi yang jika tidak akan menabrak batas paket.", "ao_apihigh": "API volume tinggi", "ao_apihigh_h": "Menaikkan batas lonjakan menjadi 200 panggilan API setiap 10 detik. Untuk sistem yang mengirim banyak permintaan sekaligus, bukan banyak sepanjang bulan.", "ao_ctwa": "Iklan Click-to-WhatsApp", "ao_ctwa_h": "Melacak klik dari iklan Facebook dan Instagram ke WhatsApp dan mengatribusikan percakapan yang dihasilkan, termasuk dasbor analitik dan Google Ads.", "ao_forms": "Formulir", "ao_forms_h": "Hingga 25 formulir WhatsApp, sehingga pelanggan mengisi kolom terstruktur di dalam chat. Dipakai untuk pemesanan, pendaftaran dan kualifikasi prospek.", "perUser": "per pengguna", "perMonth": "per bulan", "langLabel": "Bahasa", "rMarketing": "Pesan marketing", "rUtility": "Pesan utility", "rAuth": "Pesan autentikasi", "rPlan": "paket", "rUsers": "pengguna", "rTriggers": "pemicu", "rCredits": "kredit Wati AI", "rExtraUsers": "pengguna tambahan", "rExtraNumbers": "nomor WhatsApp tambahan", "rExtraTriggers": "Pemicu otomatisasi tambahan", "rExtraCredits": "Kredit Wati AI tambahan", "rShopify": "Integrasi Shopify", "rSvcFree": "Pesan layanan, jatah gratis", "rService": "Pesan layanan", "rSubHead": "Langganan — ditagih pada siklus paket Anda", "rSubTotal": "Subtotal langganan", "rMsgHead": "Pesan — dari dompet prabayar Anda", "rMsgTotal": "Subtotal dompet", "aoFree": "sudah termasuk di paket ini", "aoBilled": "ditagih dalam paket 5", "aoLearn": "Apa fungsinya", "discLabel": "Diskon yang bisa Anda berikan", "discOff": "Anda melepas", "discPerMonth": "per bulan", "discNet": "setelah diskon", "discYear": "dilepas selama setahun", "grpRest": "Negara lainnya", "discEff": "dari tagihan", "dg_plan": "Biaya paket", "dg_seats": "Pengguna tambahan", "dg_numbers": "Nomor WhatsApp tambahan", "dg_triggers": "Pemicu tambahan", "dg_credits": "Kredit Wati AI tambahan", "dg_addons": "Add-on", "dg_messages": "Pesan", "discApplies": "untuk seluruh paket — ubah baris mana pun di bawah", "billedIn": "ditagih dalam", "ccyBilling": "mata uang penagihan"}};
   var LANG_NAMES = { en:"English", es:"Espa\u00f1ol", pt:"Portugu\u00eas",
     id:"Bahasa Indonesia", ms:"Bahasa Melayu", "zh-Hans":"\u7b80\u4f53\u4e2d\u6587",
-    "zh-Hant":"\u7e41\u9ad4\u4e2d\u6587" };
+    "zh-Hant":"\u7e41\u9ad4\u4e2d\u6587", de:"Deutsch", fr:"Fran\u00e7ais" };
   var LANG = "en";
   var EN = {};
 
@@ -648,6 +764,10 @@
       if (LANG === "en") h1.innerHTML = HEADLINE_HTML;
       else h1.textContent = T("t001", "");
     }
+    Array.prototype.forEach.call(document.querySelectorAll("[data-i18n-group]"), function(el){
+      el.label = el.getAttribute("data-i18n-group") === "home"
+        ? CONFIG.region : T("grpRest", "Everywhere else");
+    });
     Array.prototype.forEach.call(document.querySelectorAll("[data-i18n]"), function(el){
       if (el.getAttribute("data-i18n-skip")) return;
       var k = el.getAttribute("data-i18n");
@@ -669,15 +789,17 @@
   };
 
   var state = {
-    country: RATES["IN"] ? "IN" : Object.keys(RATES)[0],
+    country: (CONFIG.defaultCountry && RATES[CONFIG.defaultCountry]) ? CONFIG.defaultCountry
+             : (RATES["IN"] ? "IN" : Object.keys(RATES)[0]),
     useCase:"mixed", numbers:1, agents:3,
     mkt:15000, util:10000, auth:0, service:0,
     triggers:2000, aiCredits:0,
     needAdvanced:false, needShopify:false,
     aiAgents:1, needVoice:false, addons:{},
+    discount:0, discOverride:{},
     cycle:"annual",
     planPick:"auto",
-    outCcy: CONFIG.planCcy
+    outCcy: CONFIG.defaultOutCcy || CONFIG.planCcy
   };
 
   /* ============================================================
@@ -871,27 +993,27 @@
     });
 
     var base = plan.prices[state.cycle];
-    subLines.push({ ccy:"plan", amount:base, name: plan.label + " " + T("rPlan","plan"),
+    subLines.push({ ccy:"plan", grp:"plan", amount:base, name: plan.label + " " + T("rPlan","plan"),
       sub: plan.seats + " " + T("rUsers","users") + " \u00b7 " + count(plan.triggers) + " " +
            T("rTriggers","triggers") + " \u00b7 " + count(plan.aiCredits) + " " + T("rCredits","Wati AI credits") });
 
     var extraSeats = Math.max(0, state.agents - plan.seats);
     if (extraSeats > 0 && plan.extraSeat !== null){
-      subLines.push({ ccy:"plan", amount: extraSeats * plan.extraSeat, extra:true,
+      subLines.push({ ccy:"plan", grp:"seats", amount: extraSeats * plan.extraSeat, extra:true,
         name: extraSeats + " " + T("rExtraUsers","extra users"),
         sub: count(extraSeats) + " \u00d7 " + money(plan.extraSeat) });
     }
 
     var extraNumbers = Math.max(0, state.numbers - 1);
     if (extraNumbers > 0 && maxNumbers === Infinity){
-      subLines.push({ ccy:"plan", amount: extraNumbers * CONFIG.extraNumber, extra:true,
+      subLines.push({ ccy:"plan", grp:"numbers", amount: extraNumbers * CONFIG.extraNumber, extra:true,
         name: extraNumbers + " " + T("rExtraNumbers","extra WhatsApp numbers"),
         sub: count(extraNumbers) + " \u00d7 " + money(CONFIG.extraNumber) });
     }
 
     var trigBand = band(CONFIG.sessionTiers, Math.max(0, state.triggers - plan.triggers), null);
     if (trigBand.price > 0){
-      subLines.push({ ccy:"plan", amount: trigBand.price, extra:true,
+      subLines.push({ ccy:"plan", grp:"triggers", amount: trigBand.price, extra:true,
         name: T("rExtraTriggers","Extra automation triggers"),
         sub: count(trigBand.need) + " over the included " + count(plan.triggers) +
              " \u2014 " + count(trigBand.size) + " band" + (trigBand.over ? ", top band" : "") });
@@ -899,7 +1021,7 @@
 
     var aiBand = band(CONFIG.aiTiers, Math.max(0, state.aiCredits - plan.aiCredits), CONFIG.aiTop);
     if (aiBand.price > 0){
-      subLines.push({ ccy:"plan", amount: aiBand.price, extra:true,
+      subLines.push({ ccy:"plan", grp:"credits", amount: aiBand.price, extra:true,
         name: T("rExtraCredits","Extra Wati AI credits"),
         sub: count(aiBand.need) + " over the included " + count(plan.aiCredits) +
              " \u2014 " + count(aiBand.size) + " band" + (aiBand.over ? "+, top band" : "") });
@@ -908,7 +1030,7 @@
     addonLines(planKey).forEach(function(l){ subLines.push(l); });
 
     if (state.needShopify){
-      subLines.push({ ccy:"USD", amount: CONFIG.shopifyUsd, extra:true,
+      subLines.push({ ccy:"USD", grp:"addons", amount: CONFIG.shopifyUsd, extra:true,
         name: T("rShopify","Shopify integration"), sub:"$4.99 a month, billed in USD" });
     }
 
@@ -916,7 +1038,7 @@
       var v = vol[cat];
       if (!v) return;
       var r = rateFor(planKey, cat, state.country);
-      msgLines.push({ ccy:"rate", amount: v * r, cat:cat,
+      msgLines.push({ ccy:"rate", grp:"messages", amount: v * r, cat:cat,
         name: T(CAT_META[cat].key, CAT_META[cat].label),
         sub: count(v) + " \u00d7 " + msgRate(r) });
     });
@@ -927,7 +1049,7 @@
           name: T("rSvcFree","Service messages, free allowance"), sub: count(vol.freeService) + " of " + count(CONFIG.serviceFree) });
       }
       if (vol.service > 0){
-        msgLines.push({ ccy:"rate", amount: vol.service * sr, cat:"service",
+        msgLines.push({ ccy:"rate", grp:"messages", amount: vol.service * sr, cat:"service",
           name: T("rService","Service messages"), sub: count(vol.service) + " \u00d7 " + msgRate(sr) });
       }
     }
@@ -982,6 +1104,34 @@
   }
   var PLAN_RANK = { growth:0, pro:1, business:2 };
 
+  /* ------------------------------------------------------------------
+     Discounts. One headline percentage covers the whole bill; any single
+     line can be overridden, so 10% overall with 20% on extra users and
+     numbers is one headline figure plus two overrides.
+     ------------------------------------------------------------------ */
+  var DISC_GROUPS = [
+    { k:"plan",     label:"Plan fee" },
+    { k:"seats",    label:"Extra users" },
+    { k:"numbers",  label:"Extra WhatsApp numbers" },
+    { k:"triggers", label:"Extra automation triggers" },
+    { k:"credits",  label:"Extra Wati AI credits" },
+    { k:"addons",   label:"Add-ons" },
+  ];
+  // Message charges come out of the prepaid wallet at rate-card cost, so they
+  // are not part of the discountable package and get no row.
+  var DISC_MSG = "messages";
+  function discFixed(g){
+    for (var i = 0; i < DISC_GROUPS.length; i++){
+      if (DISC_GROUPS[i].k === g) return !!DISC_GROUPS[i].fixed;
+    }
+    return false;
+  }
+  function discPct(g){
+    if (discFixed(g)) return 0;
+    var o = state.discOverride[g];
+    return (o === undefined || o === null) ? state.discount : o;
+  }
+
   function addonLines(planKey){
     var out = [];
     (CONFIG.addons || []).forEach(function(a){
@@ -989,16 +1139,16 @@
       if (!v) return;
       var ccy = a.ccy === "USD" ? "USD" : "plan";
       if (addonFree(a, planKey)){
-        out.push({ ccy:ccy, amount:0, extra:true, addon:true, free:true,
+        out.push({ ccy:ccy, grp:"addons", amount:0, extra:true, addon:true, free:true,
           name: T("ao_" + a.k, a.label), sub: T("aoFree","included on this plan") });
       } else if (a.unit === "user"){
         var seats = addonSeats(v);
-        out.push({ ccy:ccy, amount: a.p * seats, extra:true, addon:true,
+        out.push({ ccy:ccy, grp:"addons", amount: a.p * seats, extra:true, addon:true,
           name: T("ao_" + a.k, a.label),
           sub: count(v) + " " + T("rUsers","users") + " \u2192 " + count(seats) + " " +
                T("aoBilled","billed in packs of 5") + " \u00d7 " + money(a.p, a.ccy) });
       } else {
-        out.push({ ccy:ccy, amount: a.p, extra:true, addon:true,
+        out.push({ ccy:ccy, grp:"addons", amount: a.p, extra:true, addon:true,
           name: T("ao_" + a.k, a.label), sub: money(a.p, a.ccy) + " " + T("perMonth","a month") });
       }
     });
@@ -1009,6 +1159,14 @@
     var ok = PLAN_ORDER.map(function(k){ return all[k]; }).filter(function(e){ return e.eligible; });
     if (ok.length) return ok.sort(function(a,b){ return a.totalOut - b.totalOut; })[0];
     return all.business;
+  }
+
+  function fmtIn(v, ccy){
+    if (isNaN(v)) return "\u2014";
+    try {
+      return new Intl.NumberFormat(undefined,{style:"currency",currency:ccy,
+        minimumFractionDigits:0,maximumFractionDigits:0}).format(Math.round(v));
+    } catch(e){ return ccy + " " + Math.round(v).toLocaleString(); }
   }
 
   function fmtOut(v){
@@ -1056,10 +1214,10 @@
     var wb = $("warnbar");
     if (!FX.live && state.outCcy !== CONFIG.planCcy){
       wb.hidden = false;
-      wb.textContent = "Live exchange rates could not be loaded, so this total uses static reference rates. Refresh rates under question 8 before quoting.";
+      wb.textContent = "Live exchange rates could not be loaded, so this total uses static reference rates. Use Refresh rates in the quote panel before quoting.";
     } else if (!FX.live && CONFIG.rateCcy !== CONFIG.planCcy){
       wb.hidden = false;
-      wb.textContent = "Live exchange rates could not be loaded. Message charges are billed in USD, so the total uses a static reference rate. Refresh rates under question 8 before quoting.";
+      wb.textContent = "Live exchange rates could not be loaded. Message charges are billed in USD, so the total uses a static reference rate. Use Refresh rates in the quote panel before quoting.";
     } else { wb.hidden = true; }
 
     var box = $("lines");
@@ -1069,15 +1227,62 @@
     addGroup(box, T("rMsgHead","Messages — from your prepaid wallet"), pick.msgLines, pick.msgOut,
              T("rMsgTotal","Wallet subtotal"));
 
+    // Discounts are applied for display only; every line above stays at list price.
+    var gBase = {};
+    pick.subLines.concat(pick.msgLines).forEach(function(l){
+      var g = l.grp || "plan";
+      gBase[g] = (gBase[g] || 0) + conv(l.amount, poolCcy(l.ccy), state.outCcy);
+    });
+    var discAmt = 0, offRows = [];
+    void DISC_MSG;
+    DISC_GROUPS.forEach(function(G){
+      var base = gBase[G.k] || 0, pct = discPct(G.k);
+      if (base > 0 && pct > 0){
+        discAmt += base * pct / 100;
+        if (state.discOverride[G.k] !== undefined) offRows.push(pct + "% " + T("dg_" + G.k, G.label));
+      }
+    });
+    var netTotal = pick.totalOut - discAmt;
+    (DISC_ROWS || []).forEach(function(r){
+      var base = gBase[r.G.k] || 0;
+      r.row.hidden = !(base > 0);
+      setDirect(r.lab, T("dg_" + r.G.k, r.G.label));
+      r.amt.textContent = fmtOut(base);
+      if (!r.G.fixed) r.inp.placeholder = String(state.discount);
+    });
+    var dOut = $("discOut");
+    if (discAmt > 0){
+      var eff = pick.totalOut > 0 ? Math.round(discAmt / pick.totalOut * 1000) / 10 : 0;
+      dOut.hidden = false;
+      dOut.innerHTML = "<b>" + T("discOff","You give away") + " " + fmtOut(discAmt) + "</b> " +
+        T("discPerMonth","a month") + " \u00b7 " + eff + "% " + T("discEff","of the bill") +
+        (offRows.length ? "<br>" + offRows.join(" \u00b7 ") : "") +
+        "<br><span class=\"was\">" + fmtOut(pick.totalOut) + "</span> \u2192 <b>" +
+        fmtOut(netTotal) + "</b> " + T("discNet","after discount") +
+        "<br>" + fmtOut(discAmt * 12) + " " + T("discYear","given away over a year");
+    } else {
+      dOut.hidden = true; dOut.innerHTML = "";
+    }
+
     var g = $("grand");
-    g.textContent = fmtOut(pick.totalOut);
+    g.textContent = fmtOut(netTotal);
+    // Show what Wati actually bills alongside the quoted currency.
+    var ga = $("grandAlt");
+    if (state.outCcy !== CONFIG.planCcy){
+      var billed = conv(netTotal, state.outCcy, CONFIG.planCcy);
+      ga.hidden = false;
+      ga.textContent = "= " + fmtIn(billed, CONFIG.planCcy) + " " +
+        T("billedIn","billed in") + " " + CONFIG.planCcy;
+    } else {
+      ga.hidden = true; ga.textContent = "";
+    }
     $("cycleLabel").textContent = cycleSub() + " \u00b7 shown in " + state.outCcy;
-    if (lastGrand !== null && Math.round(pick.totalOut) !== lastGrand){
+    if (lastGrand !== null && Math.round(netTotal) !== lastGrand){
       g.classList.remove("pulse"); void g.offsetWidth; g.classList.add("pulse");
     }
-    lastGrand = Math.round(pick.totalOut);
+    lastGrand = Math.round(netTotal);
     $("mbPlan").textContent = "Wati " + pick.plan.label;
-    $("mbTotal").textContent = fmtOut(pick.totalOut);
+    $("mbTotal").textContent = fmtOut(netTotal);
 
     var mk = conv(pick.volumes.marketing * rateFor(pick.key,"marketing",state.country), CONFIG.rateCcy, state.outCcy);
     var ut = conv(pick.volumes.utility * rateFor(pick.key,"utility",state.country) +
@@ -1299,6 +1504,9 @@
   });
 
   Array.prototype.forEach.call($("planPick").children, function(b){
+    if (b.dataset.plan !== "auto" && PLAN_ORDER.indexOf(b.dataset.plan) === -1){
+      b.hidden = true; return;
+    }
     b.addEventListener("click", function(){ state.planPick = b.dataset.plan; render(); });
   });
 
@@ -1309,6 +1517,57 @@
     });
   })();
   $("needVoice").addEventListener("change", function(){ state.needVoice = this.checked; render(); });
+
+  (function(){
+    var btn = $("themeBtn"), root = document.documentElement;
+    function sync(){
+      var dark = root.getAttribute("data-theme") === "dark";
+      btn.setAttribute("aria-pressed", String(dark));
+      btn.title = dark ? "Switch to light mode" : "Switch to dark mode";
+    }
+    sync();
+    btn.addEventListener("click", function(){
+      var dark = root.getAttribute("data-theme") === "dark";
+      root.setAttribute("data-theme", dark ? "light" : "dark");
+      try { localStorage.setItem("wati-theme", dark ? "light" : "dark"); } catch(e){}
+      sync();
+    });
+  })();
+
+  var DISC_ROWS = [];
+  (function(){
+    var d = $("discNum");
+    d.addEventListener("input", function(){
+      state.discount = Math.max(0, Math.min(100, Number(d.value) || 0)); render();
+    });
+
+    var rows = $("discRows");
+
+    DISC_GROUPS.forEach(function(G){
+      var row = document.createElement("div"); row.className = "drow";
+      var lab = document.createElement("span"); lab.className = "dlab";
+      var amt = document.createElement("span"); amt.className = "damt";
+      var inp = document.createElement("input");
+      inp.className = "num"; inp.type = "number"; inp.min = "0"; inp.max = "100"; inp.step = "1";
+      inp.id = "disc_" + G.k;
+      inp.setAttribute("aria-label", G.label + " discount percent");
+      var pc = document.createElement("span"); pc.className = "dpc"; pc.textContent = "%";
+      if (G.fixed){
+        row.className = "drow fixed";
+        inp.value = "0"; inp.disabled = true;
+      } else {
+        inp.addEventListener("input", function(){
+          var v = inp.value.trim();
+          if (v === "") delete state.discOverride[G.k];
+          else state.discOverride[G.k] = Math.max(0, Math.min(100, Number(v) || 0));
+          render();
+        });
+      }
+      row.appendChild(lab); row.appendChild(amt); row.appendChild(inp); row.appendChild(pc);
+      rows.appendChild(row);
+      DISC_ROWS.push({ G:G, row:row, lab:lab, amt:amt, inp:inp });
+    });
+  })();
 
   // Add-ons are built from the region's rate card, grouped per-user then monthly.
   var ADDON_LABELS = [];
@@ -1407,7 +1666,7 @@
       o.value = code; o.textContent = LANG_NAMES[code] || code;
       sel.appendChild(o);
     });
-    sel.hidden = false;
+    $("langBox").hidden = false;
     sel.value = "en";
     sel.addEventListener("change", function(){ LANG = sel.value; applyLang(); });
   })();
@@ -1443,11 +1702,29 @@
   // recipient country — every country on the rate card
   (function(){
     var sel = $("country");
-    Object.keys(RATES).forEach(function(iso){
+    // The region's own markets sit at the top; every other country on the card
+    // follows, so an AE can still price a message to anywhere.
+    var home = (CONFIG.homeIsos || []).filter(function(i){ return RATES[i]; });
+    var inHome = {}; home.forEach(function(i){ inHome[i] = true; });
+    function opt(iso){
       var o = document.createElement("option");
       o.value = iso; o.textContent = NAMES[iso] || iso;
-      sel.appendChild(o);
-    });
+      return o;
+    }
+    if (home.length && home.length < Object.keys(RATES).length){
+      var g1 = document.createElement("optgroup");
+      g1.label = CONFIG.region;
+      g1.setAttribute("data-i18n-group", "home");
+      home.forEach(function(i){ g1.appendChild(opt(i)); });
+      sel.appendChild(g1);
+      var g2 = document.createElement("optgroup");
+      g2.label = "Everywhere else";
+      g2.setAttribute("data-i18n-group", "rest");
+      Object.keys(RATES).forEach(function(iso){ if (!inHome[iso]) g2.appendChild(opt(iso)); });
+      sel.appendChild(g2);
+    } else {
+      Object.keys(RATES).forEach(function(iso){ sel.appendChild(opt(iso)); });
+    }
     sel.value = state.country;
     sel.addEventListener("change", function(){ state.country = this.value; render(); });
   })();
@@ -1496,7 +1773,7 @@
       o.disabled = !ok;
       (group || sel).appendChild(o);
     }
-    add(CONFIG.planCcy + " — how Wati bills this region", CONFIG.planCcy);
+    add(CONFIG.planCcy + " \u00b7 " + T("ccyBilling","billing currency"), CONFIG.planCcy);
     var g = document.createElement("optgroup");
     g.label = CONFIG.region + " local currencies";
     CONFIG.currencies.forEach(function(c){ add(c.country + " — " + c.ccy, c.ccy, g); });
@@ -1546,8 +1823,31 @@
     p.msgLines.forEach(function(l){ out.push(pad(l.name + (l.sub ? " (" + l.sub + ")" : ""), amt(l))); });
     out.push(pad("Wallet subtotal", fmtOut(p.msgOut)));
     out.push("");
-    out.push(pad("TOTAL PER MONTH", fmtOut(p.totalOut)));
-    out.push(pad("Total per year", fmtOut(p.totalOut * 12)));
+    var gb = {};
+    p.subLines.concat(p.msgLines).forEach(function(l){
+      var g = l.grp || "plan";
+      gb[g] = (gb[g] || 0) + conv(l.amount, poolCcy(l.ccy), state.outCcy);
+    });
+    var dAmt = 0, dLines = [];
+    DISC_GROUPS.forEach(function(G){
+      var base = gb[G.k] || 0, pct = discPct(G.k);
+      if (base > 0 && pct > 0){
+        var a = base * pct / 100;
+        dAmt += a;
+        dLines.push(pad("  " + G.label + " \u2014 " + pct + "%", "-" + fmtOut(a)));
+      }
+    });
+    if (dAmt > 0){
+      out.push(pad("List price per month", fmtOut(p.totalOut)));
+      out.push("Discount applied");
+      dLines.forEach(function(l){ out.push(l); });
+      out.push(pad("Total discount", "-" + fmtOut(dAmt)));
+      out.push(pad("TOTAL PER MONTH AFTER DISCOUNT", fmtOut(p.totalOut - dAmt)));
+      out.push(pad("Total per year after discount", fmtOut((p.totalOut - dAmt) * 12)));
+    } else {
+      out.push(pad("TOTAL PER MONTH", fmtOut(p.totalOut)));
+      out.push(pad("Total per year", fmtOut(p.totalOut * 12)));
+    }
     out.push("");
     if (!p.eligible) out.push("Note: no standard plan meets these requirements \u2014 this needs a custom quote.");
     out.push("Inbound customer messages, the first " + count(CONFIG.serviceFree) + " service messages a month and");
